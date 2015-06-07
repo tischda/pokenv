@@ -20,7 +20,7 @@ func main() {
 	fileName := flag.String("f", "REQUIRED", "file name")
 	version := flag.Bool("version", false, "print version")
 
-	// registry = realRegistry{}
+	// FIXME: registry = realRegistry{}
 	registry = mockRegistry{}
 	registry.env = make(map[string]string)
 

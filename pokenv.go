@@ -11,9 +11,10 @@ import (
 
 var sectionRegex = regexp.MustCompile(`^\[(.*)\]$`)
 
+// FIXME: set type to Registry
 var registry mockRegistry
-var env map[string][]string
-var set map[string]bool
+var environment map[string][]string
+var uniqueValueSet map[string]bool
 
 var currentVariable string
 
@@ -23,7 +24,7 @@ func setEnv(path string, fileName string) {
 }
 
 func setVars(path string) {
-	for variable, values := range env {
+	for variable, values := range environment {
 		joined := strings.Join(values, ";")
 		fmt.Printf("setting `%s` to `%s`\n", variable, joined)
 		registry.SetString(path, variable, joined)
@@ -32,7 +33,7 @@ func setVars(path string) {
 
 func processFile(fileName string) {
 
-	env = make(map[string][]string)
+	environment = make(map[string][]string)
 
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -67,14 +68,14 @@ func processLine(line string) {
 
 func processSection(section string) {
 	currentVariable = strings.TrimSpace(section)
-	set = make(map[string]bool)
+	uniqueValueSet = make(map[string]bool)
 }
 
 func processValue(line string) {
-	if set[line] {
+	if uniqueValueSet[line] {
 		fmt.Println("duplicate:", line)
 	} else {
-		set[line] = true
-		env[currentVariable] = append(env[currentVariable], line)
+		uniqueValueSet[line] = true
+		environment[currentVariable] = append(environment[currentVariable], line)
 	}
 }
