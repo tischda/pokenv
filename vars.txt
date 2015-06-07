@@ -1,0 +1,17 @@
+[GOPATH]
+value with spaces
+value with \ backslashes
+nodup
+
+ [PATH ]
+line 1
+nodup
+
+# comment
+line 2
+line 3;semicolon
+duplicate
+duplicate
+c:
+
+ # other comment
