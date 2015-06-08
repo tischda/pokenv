@@ -17,34 +17,21 @@ func TestProcessLineValue(t *testing.T) {
 	addCurrent("")
 
 	processLine(" value # comment")
-
-	expected := "value"
-	actual := environment[currentVariable][0]
-
-	if actual != expected {
-		t.Errorf("Expected: %q, was: %q", expected, actual)
-	}
+	assertEquals(t, "value", environment[currentVariable][0])
 }
 
 func TestProcessLineSection(t *testing.T) {
 	environment = make(map[string][]string)
-
 	processLine("[ A SECTION ]")
-
-	expected := "ASECTION"
-	actual := currentVariable
-
-	if actual != expected {
-		t.Errorf("Expected: %q, was: %q", expected, actual)
-	}
+	assertEquals(t, "ASECTION", currentVariable)
 }
 
 func TestProcessTestFile(t *testing.T) {
 	setEnv(HKLM, `data/setvar.txt`)
+	assertEquals(t, "valueline1", mock.env["POKE_SECTION"])
+}
 
-	expected := "valueline1"
-	actual := mock.env["POKE_SECTION"]
-
+func assertEquals(t *testing.T, expected string, actual string) {
 	if actual != expected {
 		t.Errorf("Expected: %q, was: %q", expected, actual)
 	}
