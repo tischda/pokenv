@@ -16,12 +16,13 @@ type regPath struct {
 	subKey string
 }
 
+// List of authorized keys, indexed by enum constant in main.go
 var target []regPath = []regPath{
 	regPath{syscall.HKEY_CURRENT_USER, `Environment`},
 	regPath{syscall.HKEY_LOCAL_MACHINE, `SYSTEM\CurrentControlSet\Control\Session Manager\Environment`},
 }
 
-// Writes a string to the Windows registry. Assumes type is REG_EXPAND_SZ when
+// Writes a string to the Windows registry. Type is set to REG_EXPAND_SZ when
 // the value contains "%", otherwise it will use REG_SZ.
 func (realRegistry) SetString(key int, valueName string, value string) error {
 	handle := OpenKey(key, syscall.KEY_SET_VALUE)
@@ -33,20 +34,13 @@ func (realRegistry) SetString(key int, valueName string, value string) error {
 		valueType = syscall.REG_EXPAND_SZ
 	}
 
-	// set value (https://github.com/golang/sys/blob/master/windows/registry/value.go#L239)
-	v, err := syscall.UTF16FromString(value)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	buf := (*[1 << 10]byte)(unsafe.Pointer(&v[0]))[:len(v)*2]
-
 	return regSetValueEx(
 		handle,
 		syscall.StringToUTF16Ptr(valueName),
 		0,
 		valueType,
-		&buf[0],
-		uint32(len(buf)))
+		(*byte)(unsafe.Pointer(syscall.StringToUTF16Ptr(value))),
+		uint32(len(value)*2))
 }
 
 // Deletes a key value from the Windows registry.

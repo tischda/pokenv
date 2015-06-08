@@ -16,5 +16,5 @@ nodup
   line2
 line3;semicolon
    # other comment
-c: # trailing comment
+%SystemRoot%\TEMP # trailing comment
 no_EOL
