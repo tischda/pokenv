@@ -1,0 +1,2 @@
+[POKE_SECTION]
+# nothing here means unset this variable
