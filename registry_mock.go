@@ -15,7 +15,7 @@ func (r mockRegistry) SetString(key int, valueName string, value string) error {
 	return nil
 }
 
-func (r mockRegistry) DeleteValue(path string, valueName string) error {
+func (r mockRegistry) DeleteValue(int int, valueName string) error {
 	delete(r.env, valueName)
 	return nil
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -23,9 +22,14 @@ func setEnv(key int, fileName string) {
 
 func setVars(key int) {
 	for variable, values := range environment {
-		joined := strings.Join(values, ";")
-		fmt.Printf("Setting `%s` to `%s`\n", variable, joined)
-		registry.SetString(key, variable, joined)
+		if firstValueIsEmpty(values) {
+			log.Println("Deleting", variable)
+			registry.DeleteValue(key, variable)
+		} else {
+			joined := strings.Join(values, ";")
+			log.Printf("Setting `%s` to `%s`\n", variable, joined)
+			registry.SetString(key, variable, joined)
+		}
 	}
 }
 
@@ -66,7 +70,9 @@ func processLine(line string) {
 
 func processSection(section string) {
 	currentVariable = strings.Replace(section, " ", "", -1)
-	setContainsValue = make(map[string]bool)
+
+	// mark section as empty (required for deletion)
+	addCurrent("")
 }
 
 func processValue(value string) {
@@ -74,9 +80,27 @@ func processValue(value string) {
 		log.Println("Fatal error: duplicate entry:", value)
 		log.Fatalln("Aborting, no value is set.")
 	} else {
+		// if this is first value, initialize and set value
+		if firstValueIsEmpty(environment[currentVariable]) {
+			setContainsValue = make(map[string]bool)
+			setFirst(value)
+		} else {
+			addCurrent(value)
+		}
 		setContainsValue[value] = true
-		environment[currentVariable] = append(environment[currentVariable], value)
 	}
+}
+
+func firstValueIsEmpty(values []string) bool {
+	return values[0] == ""
+}
+
+func setFirst(value string) {
+	environment[currentVariable][0] = value
+}
+
+func addCurrent(value string) {
+	environment[currentVariable] = append(environment[currentVariable], value)
 }
 
 func trimComments(s string) string {
