@@ -24,7 +24,7 @@ func setEnv(key int, fileName string) {
 func setVars(key int) {
 	for variable, values := range environment {
 		joined := strings.Join(values, ";")
-		fmt.Printf("setting `%s` to `%s`\n", variable, joined)
+		fmt.Printf("Setting `%s` to `%s`\n", variable, joined)
 		registry.SetString(key, variable, joined)
 	}
 }
@@ -71,8 +71,8 @@ func processSection(section string) {
 
 func processValue(value string) {
 	if setContainsValue[value] {
-		// log.Fatalln("Error, duplicate entry:", value)
-		log.Println("Error, duplicate entry:", value)
+		log.Println("Fatal error: duplicate entry:", value)
+		log.Fatalln("Aborting, no value is set.")
 	} else {
 		setContainsValue[value] = true
 		environment[currentVariable] = append(environment[currentVariable], value)
