@@ -35,7 +35,7 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Println("Pokenv v0.1.0")
+		fmt.Println("Pokenv v1.0.0")
 		return
 	}
 	if flag.NArg() != 1 || flag.NFlag() != 1 {

@@ -1,5 +1,5 @@
 # version format
-version: "1.1.0-{build}"
+version: "1.0.0-{build}"
 
 # branches to build
 branches:
@@ -50,6 +50,9 @@ test_script:
   - go test -v -cover
   - go test -v | go2xunit -xunitnet > xunit-report.xml
   - pokenv.exe -version
+  - pokenv.exe -hkcu data\setvar.txt
+  - pokenv.exe -hkcu data\delvar.txt
+  - pokenv.exe -hkcu data\testvars-pass.txt
 
 # artifacts configuration
 artifacts:
