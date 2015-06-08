@@ -4,7 +4,13 @@ type mockRegistry struct {
 	env map[string]string
 }
 
-func (r mockRegistry) SetString(path string, valueName string, value string) error {
+var mock = mockRegistry{}
+
+func init() {
+	mock.env = make(map[string]string)
+}
+
+func (r mockRegistry) SetString(key int, valueName string, value string) error {
 	r.env[valueName] = value
 	return nil
 }

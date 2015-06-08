@@ -11,23 +11,21 @@ import (
 
 var sectionRegex = regexp.MustCompile(`^\[(.*)\]$`)
 
-// FIXME: set type to Registry
-var registry mockRegistry
 var environment map[string][]string
-var uniqueValueSet map[string]bool
+var setContainsValue map[string]bool
 
 var currentVariable string
 
-func setEnv(path string, fileName string) {
+func setEnv(key int, fileName string) {
 	processFile(fileName)
-	setVars(path)
+	setVars(key)
 }
 
-func setVars(path string) {
+func setVars(key int) {
 	for variable, values := range environment {
 		joined := strings.Join(values, ";")
 		fmt.Printf("setting `%s` to `%s`\n", variable, joined)
-		registry.SetString(path, variable, joined)
+		registry.SetString(key, variable, joined)
 	}
 }
 
@@ -62,20 +60,28 @@ func processLine(line string) {
 	if match != nil {
 		processSection(match[1])
 	} else {
-		processValue(line)
+		processValue(trimComments(line))
 	}
 }
 
 func processSection(section string) {
-	currentVariable = strings.TrimSpace(section)
-	uniqueValueSet = make(map[string]bool)
+	currentVariable = strings.Replace(section, " ", "", -1)
+	setContainsValue = make(map[string]bool)
 }
 
-func processValue(line string) {
-	if uniqueValueSet[line] {
-		fmt.Println("duplicate:", line)
+func processValue(value string) {
+	if setContainsValue[value] {
+		// log.Fatalln("Error, duplicate entry:", value)
+		log.Println("Error, duplicate entry:", value)
 	} else {
-		uniqueValueSet[line] = true
-		environment[currentVariable] = append(environment[currentVariable], line)
+		setContainsValue[value] = true
+		environment[currentVariable] = append(environment[currentVariable], value)
 	}
+}
+
+func trimComments(s string) string {
+	if idx := strings.Index(s, "#"); idx != -1 {
+		return strings.TrimSpace(s[:idx])
+	}
+	return s
 }

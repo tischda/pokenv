@@ -1,0 +1,22 @@
+[POKE_GO PATH]
+value with spaces
+with \ backslashes
+with \\ backslashes
+with \\\ backslashes
+with " quote
+with "" quote
+with """ quote
+nodup
+
+        [POKE_PATH ]
+line1
+nodup
+
+# comment
+  line2
+line3;semicolon
+   # other comment
+duplicate
+duplicate
+c: # trailing comment
+no_EOL
