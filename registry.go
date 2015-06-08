@@ -27,18 +27,26 @@ func (realRegistry) SetString(key int, valueName string, value string) error {
 	handle := OpenKey(key, syscall.KEY_SET_VALUE)
 	defer syscall.RegCloseKey(handle)
 
+	// set type
 	var valueType uint32 = syscall.REG_SZ
 	if strings.Contains(value, "%") {
 		valueType = syscall.REG_EXPAND_SZ
 	}
+
+	// set value (https://github.com/golang/sys/blob/master/windows/registry/value.go#L239)
+	v, err := syscall.UTF16FromString(value)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	buf := (*[1 << 10]byte)(unsafe.Pointer(&v[0]))[:len(v)*2]
 
 	return regSetValueEx(
 		handle,
 		syscall.StringToUTF16Ptr(valueName),
 		0,
 		valueType,
-		(*byte)(unsafe.Pointer(&value)),
-		8)
+		&buf[0],
+		uint32(len(buf)))
 }
 
 // Opens a Windows HKCU or HKLM registry key and returns a handle. You must close

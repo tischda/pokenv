@@ -22,8 +22,8 @@ func main() {
 	hklm := flag.Bool("hklm", false, "set HKEY_LOCAL_MACHINE environment")
 	version := flag.Bool("version", false, "print version")
 
-	// FIXME: registry = realRegistry{}
-	registry = mock
+	registry = realRegistry{}
+	// registry = mock
 
 	// configure logging
 	log.SetFlags(0)
