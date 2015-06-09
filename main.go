@@ -9,6 +9,8 @@ import (
 	"os"
 )
 
+const version string = "1.0.0"
+
 var registry Registry
 
 const (
@@ -20,10 +22,9 @@ const (
 func main() {
 	hkcu := flag.Bool("hkcu", false, "set HKEY_CURRENT_USER environment")
 	hklm := flag.Bool("hklm", false, "set HKEY_LOCAL_MACHINE environment")
-	version := flag.Bool("version", false, "print version")
+	showVersion := flag.Bool("version", false, "print version and exit")
 
 	registry = realRegistry{}
-	// registry = mock
 
 	// configure logging
 	log.SetFlags(0)
@@ -34,8 +35,8 @@ func main() {
 	}
 	flag.Parse()
 
-	if *version {
-		fmt.Println("Pokenv v1.0.0")
+	if *showVersion {
+		fmt.Println("pokenv version", version)
 		return
 	}
 	if flag.NArg() != 1 || flag.NFlag() != 1 {
