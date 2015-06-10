@@ -11,14 +11,6 @@ import (
 
 const version string = "1.0.0"
 
-var registry Registry
-
-const (
-	// do not reorder
-	HKCU = iota
-	HKLM
-)
-
 func main() {
 	hkcu := flag.Bool("hkcu", false, "set HKEY_CURRENT_USER environment")
 	hklm := flag.Bool("hklm", false, "set HKEY_LOCAL_MACHINE environment")
