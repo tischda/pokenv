@@ -16,7 +16,7 @@ type regPath struct {
 	subKey string
 }
 
-// List of authorized keys, indexed by enum constant in main.go
+// List of registry paths, indexed by enum constant in registry_interface.go
 var target []regPath = []regPath{
 	regPath{syscall.HKEY_CURRENT_USER, `Environment`},
 	regPath{syscall.HKEY_LOCAL_MACHINE, `SYSTEM\CurrentControlSet\Control\Session Manager\Environment`},

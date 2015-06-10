@@ -1,6 +1,6 @@
 package main
 
-// Registry keys, do not reorder
+// Registry key indexes, do not reorder
 const (
 	HKCU = iota
 	HKLM
