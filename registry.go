@@ -43,7 +43,8 @@ func (realRegistry) SetString(path regPath, valueName string, value string) erro
 		uint32(len(value)*2))
 }
 
-// Read string from Windows registry
+// Read string from Windows registry (no expansion).
+// Thanks to http://npf.io/2012/11/go-win-stuff/
 func (realRegistry) GetString(path regPath, valueName string) (value string, err error) {
 	handle := openKey(path, syscall.KEY_QUERY_VALUE)
 	defer syscall.RegCloseKey(handle)
@@ -51,6 +52,7 @@ func (realRegistry) GetString(path regPath, valueName string) (value string, err
 	var typ uint32
 	var bufSize uint32
 
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms724911(v=vs.85).aspx
 	err = syscall.RegQueryValueEx(
 		handle,
 		syscall.StringToUTF16Ptr(valueName),
