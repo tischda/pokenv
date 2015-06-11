@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-const version string = "1.0.0"
+const version string = "1.1.0"
 
 func main() {
 	hkcu := flag.String("hkcu", "REQUIRED", "process input file into HKEY_CURRENT_USER environment")
