@@ -6,28 +6,31 @@ import (
 	"testing"
 )
 
+var sut pokenv
+
 func init() {
-	registry = mock
+	sut = pokenv{
+		environment: make(map[string][]string),
+		registry:    mock,
+	}
 	log.SetOutput(ioutil.Discard)
 }
 
 func TestProcessLineValue(t *testing.T) {
-	environment = make(map[string][]string)
-	currentVariable = "TESTING"
-	addCurrent("")
+	sut.currentVariable = "TESTING"
+	sut.addCurrent("")
 
-	processLine(" value # comment")
-	assertEquals(t, "value", environment[currentVariable][0])
+	sut.processLine(" value # comment")
+	assertEquals(t, "value", sut.environment[sut.currentVariable][0])
 }
 
 func TestProcessLineSection(t *testing.T) {
-	environment = make(map[string][]string)
-	processLine("[ A SECTION ]")
-	assertEquals(t, "ASECTION", currentVariable)
+	sut.processLine("[ A SECTION ]")
+	assertEquals(t, "ASECTION", sut.currentVariable)
 }
 
 func TestProcessTestFile(t *testing.T) {
-	setEnv(HKLM, `data/setvar.txt`)
+	sut.setEnv(HKLM, `data/setvar.txt`)
 	assertEquals(t, "valueline1", mock.env["POKE_SECTION"])
 }
 

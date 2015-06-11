@@ -6,8 +6,6 @@ const (
 	HKLM
 )
 
-var registry Registry
-
 type Registry interface {
 	DeleteValue(key int, valueName string) error
 	SetString(key int, valueName string, value string) error

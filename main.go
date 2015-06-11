@@ -16,8 +16,6 @@ func main() {
 	hklm := flag.Bool("hklm", false, "set HKEY_LOCAL_MACHINE environment")
 	showVersion := flag.Bool("version", false, "print version and exit")
 
-	registry = realRegistry{}
-
 	// configure logging
 	log.SetFlags(0)
 
@@ -35,10 +33,16 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
+
+	p := pokenv{
+		environment: make(map[string][]string),
+		registry:    realRegistry{},
+	}
+
 	if *hkcu {
-		setEnv(HKCU, flag.Arg(0))
+		p.setEnv(HKCU, flag.Arg(0))
 	}
 	if *hklm {
-		setEnv(HKLM, flag.Arg(0))
+		p.setEnv(HKLM, flag.Arg(0))
 	}
 }

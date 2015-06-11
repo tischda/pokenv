@@ -10,32 +10,34 @@ import (
 
 var sectionRegex = regexp.MustCompile(`^\[(.*)\]$`)
 
-var environment map[string][]string
-var setContainsValue map[string]bool
-
-var currentVariable string
-
-func setEnv(key int, fileName string) {
-	processFile(fileName)
-	setVars(key)
+type pokenv struct {
+	environment      map[string][]string
+	setContainsValue map[string]bool
+	currentVariable  string
+	registry         Registry
 }
 
-func setVars(key int) {
-	for variable, values := range environment {
-		if firstValueIsEmpty(values) {
+func (p *pokenv) setEnv(key int, fileName string) {
+	p.processFile(fileName)
+	p.setVars(key)
+}
+
+func (p *pokenv) setVars(key int) {
+	for variable, values := range p.environment {
+		if p.firstValueIsEmpty(values) {
 			log.Println("Deleting", variable)
-			registry.DeleteValue(key, variable)
+			p.registry.DeleteValue(key, variable)
 		} else {
 			joined := strings.Join(values, ";")
 			log.Printf("Setting `%s` to `%s`\n", variable, joined)
-			registry.SetString(key, variable, joined)
+			p.registry.SetString(key, variable, joined)
 		}
 	}
 }
 
-func processFile(fileName string) {
+func (p *pokenv) processFile(fileName string) {
 
-	environment = make(map[string][]string)
+	p.environment = make(map[string][]string)
 
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -46,11 +48,11 @@ func processFile(fileName string) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		processLine(strings.TrimSpace(line))
+		p.processLine(strings.TrimSpace(line))
 	}
 }
 
-func processLine(line string) {
+func (p *pokenv) processLine(line string) {
 	// ignore blank line
 	if line == "" {
 		return
@@ -62,45 +64,45 @@ func processLine(line string) {
 	// sections and values
 	match := sectionRegex.FindStringSubmatch(line)
 	if match != nil {
-		processSection(match[1])
+		p.processSection(match[1])
 	} else {
-		processValue(trimComments(line))
+		p.processValue(trimComments(line))
 	}
 }
 
-func processSection(section string) {
-	currentVariable = strings.Replace(section, " ", "", -1)
+func (p *pokenv) processSection(section string) {
+	p.currentVariable = strings.Replace(section, " ", "", -1)
 
 	// mark section as empty (required for deletion)
-	addCurrent("")
+	p.addCurrent("")
 }
 
-func processValue(value string) {
-	if setContainsValue[value] {
+func (p *pokenv) processValue(value string) {
+	if p.setContainsValue[value] {
 		log.Println("Fatal error: duplicate entry:", value)
 		log.Fatalln("Aborting, no value is set.")
 	} else {
 		// if this is first value, initialize and set value
-		if firstValueIsEmpty(environment[currentVariable]) {
-			setContainsValue = make(map[string]bool)
-			setFirst(value)
+		if p.firstValueIsEmpty(p.environment[p.currentVariable]) {
+			p.setContainsValue = make(map[string]bool)
+			p.setFirst(value)
 		} else {
-			addCurrent(value)
+			p.addCurrent(value)
 		}
-		setContainsValue[value] = true
+		p.setContainsValue[value] = true
 	}
 }
 
-func firstValueIsEmpty(values []string) bool {
+func (p *pokenv) firstValueIsEmpty(values []string) bool {
 	return values[0] == ""
 }
 
-func setFirst(value string) {
-	environment[currentVariable][0] = value
+func (p *pokenv) setFirst(value string) {
+	p.environment[p.currentVariable][0] = value
 }
 
-func addCurrent(value string) {
-	environment[currentVariable] = append(environment[currentVariable], value)
+func (p *pokenv) addCurrent(value string) {
+	p.environment[p.currentVariable] = append(p.environment[p.currentVariable], value)
 }
 
 func trimComments(s string) string {
