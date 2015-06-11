@@ -14,11 +14,12 @@ go build
 ### Usage
 
 ~~~
-Usage: pokenv [options] infile
+Usage: pokenv [-checkpaths] [-hkcu|-hklm] infile
   infile: the input file
-  -hkcu=false: set HKEY_CURRENT_USER environment
-  -hklm=false: set HKEY_LOCAL_MACHINE environment
-  -version=false: print version
+  -checkpaths=false: values are paths, check that they are valid on this system
+  -hkcu="REQUIRED": process input file into HKEY_CURRENT_USER environment
+  -hklm="REQUIRED": process input file into HKEY_LOCAL_MACHINE environment
+  -version=false: print version and exit
 ~~~
 
 ### Other setters
