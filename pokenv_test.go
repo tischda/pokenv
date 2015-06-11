@@ -39,3 +39,18 @@ func assertEquals(t *testing.T, expected string, actual string) {
 		t.Errorf("Expected: %q, was: %q", expected, actual)
 	}
 }
+
+func TestCheckPath(t *testing.T) {
+	paths := []string{
+		`c:\Windows`,
+		`c:\Windows\system32`,
+		`%windir%`,
+		`%windir%\system32`,
+		`.`,
+	}
+	for _, path := range paths {
+		if isPathInvalid(path) {
+			t.Errorf("Invalid path:", path)
+		}
+	}
+}

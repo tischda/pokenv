@@ -18,6 +18,7 @@ type pokenv struct {
 	setContainsValue map[string]bool
 	currentVariable  string
 	registry         Registry
+	pathcheck        bool
 }
 
 func (p *pokenv) setEnv(path regPath, fileName string) {
@@ -85,6 +86,12 @@ func (p *pokenv) processValue(value string) {
 		log.Println("Fatal error: duplicate entry:", value)
 		log.Fatalln("Aborting, no value is set.")
 	} else {
+		if p.pathcheck {
+			if isPathInvalid(value) {
+				log.Fatalln("Invalid path:", value)
+			}
+		}
+
 		// if this is first value, initialize and set value
 		if p.firstValueIsEmpty(p.environment[p.currentVariable]) {
 			p.setContainsValue = make(map[string]bool)
@@ -113,4 +120,15 @@ func trimComments(s string) string {
 		return strings.TrimSpace(s[:idx])
 	}
 	return s
+}
+
+func isPathInvalid(value string) bool {
+	var filename = value
+	for strings.Contains(filename, "%") {
+		regexp := regexp.MustCompile(`(.*)%(.*)%(.*)`)
+		parts := regexp.FindStringSubmatch(filename)
+		filename = parts[1] + os.ExpandEnv("${"+parts[2]+"}") + parts[3]
+	}
+	_, err := os.Stat(filename)
+	return err != nil
 }

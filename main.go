@@ -12,15 +12,16 @@ import (
 const version string = "1.0.0"
 
 func main() {
-	hkcu := flag.Bool("hkcu", false, "set HKEY_CURRENT_USER environment")
-	hklm := flag.Bool("hklm", false, "set HKEY_LOCAL_MACHINE environment")
+	hkcu := flag.String("hkcu", "REQUIRED", "process input file into HKEY_CURRENT_USER environment")
+	hklm := flag.String("hklm", "REQUIRED", "process input file into HKEY_LOCAL_MACHINE environment")
+	check := flag.Bool("checkpaths", false, "values are paths, check that they are valid on this system")
 	showVersion := flag.Bool("version", false, "print version and exit")
 
 	// configure logging
 	log.SetFlags(0)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [options] infile\n  infile: the input file\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [-checkpaths] [-hkcu|-hklm] infile\n  infile: the input file\n", os.Args[0])
 		flag.PrintDefaults()
 	}
 	flag.Parse()
@@ -29,7 +30,7 @@ func main() {
 		fmt.Println("pokenv version", version)
 		return
 	}
-	if flag.NArg() != 1 || flag.NFlag() != 1 {
+	if flag.NFlag() < 1 {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -37,12 +38,13 @@ func main() {
 	p := pokenv{
 		environment: make(map[string][]string),
 		registry:    realRegistry{},
+		pathcheck:   *check,
 	}
 
-	if *hkcu {
-		p.setEnv(PATH_USER, flag.Arg(0))
+	if *hkcu != "REQUIRED" {
+		p.setEnv(PATH_USER, *hkcu)
 	}
-	if *hklm {
-		p.setEnv(PATH_MACHINE, flag.Arg(0))
+	if *hklm != "REQUIRED" {
+		p.setEnv(PATH_MACHINE, *hklm)
 	}
 }
