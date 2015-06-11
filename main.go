@@ -40,9 +40,9 @@ func main() {
 	}
 
 	if *hkcu {
-		p.setEnv(HKCU, flag.Arg(0))
+		p.setEnv(PATH_USER, flag.Arg(0))
 	}
 	if *hklm {
-		p.setEnv(HKLM, flag.Arg(0))
+		p.setEnv(PATH_MACHINE, flag.Arg(0))
 	}
 }

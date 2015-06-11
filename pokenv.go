@@ -10,6 +10,9 @@ import (
 
 var sectionRegex = regexp.MustCompile(`^\[(.*)\]$`)
 
+var PATH_USER = regPath{HKEY_CURRENT_USER, `Environment`}
+var PATH_MACHINE = regPath{HKEY_LOCAL_MACHINE, `SYSTEM\CurrentControlSet\Control\Session Manager\Environment`}
+
 type pokenv struct {
 	environment      map[string][]string
 	setContainsValue map[string]bool
@@ -17,20 +20,20 @@ type pokenv struct {
 	registry         Registry
 }
 
-func (p *pokenv) setEnv(key int, fileName string) {
+func (p *pokenv) setEnv(path regPath, fileName string) {
 	p.processFile(fileName)
-	p.setVars(key)
+	p.setVars(path)
 }
 
-func (p *pokenv) setVars(key int) {
+func (p *pokenv) setVars(path regPath) {
 	for variable, values := range p.environment {
 		if p.firstValueIsEmpty(values) {
 			log.Println("Deleting", variable)
-			p.registry.DeleteValue(key, variable)
+			p.registry.DeleteValue(path, variable)
 		} else {
 			joined := strings.Join(values, ";")
 			log.Printf("Setting `%s` to `%s`\n", variable, joined)
-			p.registry.SetString(key, variable, joined)
+			p.registry.SetString(path, variable, joined)
 		}
 	}
 }
