@@ -43,9 +43,45 @@ func (realRegistry) SetString(path regPath, valueName string, value string) erro
 		uint32(len(value)*2))
 }
 
+// Read string from Windows registry
+func (realRegistry) GetString(path regPath, valueName string) (value string, err error) {
+	handle := openKey(path, syscall.KEY_QUERY_VALUE)
+	defer syscall.RegCloseKey(handle)
+
+	var typ uint32
+	var bufSize uint32
+
+	err = syscall.RegQueryValueEx(
+		handle,
+		syscall.StringToUTF16Ptr(valueName),
+		nil,
+		&typ,
+		nil,
+		&bufSize)
+
+	if err != nil {
+		return
+	}
+
+	data := make([]uint16, bufSize/2+1)
+
+	err = syscall.RegQueryValueEx(
+		handle,
+		syscall.StringToUTF16Ptr(valueName),
+		nil,
+		&typ,
+		(*byte)(unsafe.Pointer(&data[0])),
+		&bufSize)
+
+	if err != nil {
+		return
+	}
+	return syscall.UTF16ToString(data), nil
+}
+
 // Deletes a key value from the Windows registry.
 func (realRegistry) DeleteValue(path regPath, valueName string) error {
-	handle := openKey(path, syscall.KEY_WRITE)
+	handle := openKey(path, syscall.KEY_SET_VALUE)
 	defer syscall.RegCloseKey(handle)
 
 	return regDeleteValue(handle, syscall.StringToUTF16Ptr(valueName))
