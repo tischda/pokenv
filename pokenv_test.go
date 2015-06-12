@@ -30,7 +30,7 @@ func TestProcessLineSection(t *testing.T) {
 }
 
 func TestProcessTestFile(t *testing.T) {
-	sut.setEnv(PATH_MACHINE, `data/setvar.txt`)
+	sut.importEnv(PATH_MACHINE, `data/setvar.txt`)
 	assertEquals(t, "valueline1", mock.env["POKE_SECTION"])
 }
 

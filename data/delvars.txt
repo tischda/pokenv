@@ -1,2 +1,8 @@
 [POKE_SECTION]
 # nothing here means delete this variable
+
+[POKE_TWICE]
+
+[POKE_GOPATH]
+
+[POKE_PATH]

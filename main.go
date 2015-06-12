@@ -42,9 +42,9 @@ func main() {
 	}
 
 	if *hkcu != "REQUIRED" {
-		p.setEnv(PATH_USER, *hkcu)
+		p.importEnv(PATH_USER, *hkcu)
 	}
 	if *hklm != "REQUIRED" {
-		p.setEnv(PATH_MACHINE, *hklm)
+		p.importEnv(PATH_MACHINE, *hklm)
 	}
 }

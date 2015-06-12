@@ -21,7 +21,7 @@ type pokenv struct {
 	pathcheck        bool
 }
 
-func (p *pokenv) setEnv(path regPath, fileName string) {
+func (p *pokenv) importEnv(path regPath, fileName string) {
 	p.processFile(fileName)
 	p.setVars(path)
 }
@@ -40,7 +40,6 @@ func (p *pokenv) setVars(path regPath) {
 }
 
 func (p *pokenv) processFile(fileName string) {
-
 	p.environment = make(map[string][]string)
 
 	file, err := os.Open(fileName)
@@ -78,7 +77,9 @@ func (p *pokenv) processSection(section string) {
 	p.currentVariable = strings.Replace(section, " ", "", -1)
 
 	// mark section as empty (required for deletion)
-	p.addCurrent("")
+	if p.environment[p.currentVariable] == nil {
+		p.addCurrent("")
+	}
 }
 
 func (p *pokenv) processValue(value string) {
