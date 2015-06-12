@@ -9,12 +9,12 @@ import (
 	"os"
 )
 
-const version string = "1.1.0"
+const version string = "1.1.1"
 
 func main() {
 	hkcu := flag.String("hkcu", "REQUIRED", "process input file into HKEY_CURRENT_USER environment")
 	hklm := flag.String("hklm", "REQUIRED", "process input file into HKEY_LOCAL_MACHINE environment")
-	check := flag.Bool("checkpaths", false, "values are paths, check that they are valid on this system")
+	check := flag.Bool("checkpaths", false, "values are paths, check if they are valid on this system")
 	showVersion := flag.Bool("version", false, "print version and exit")
 
 	// configure logging
