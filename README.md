@@ -3,12 +3,12 @@
 Windows utility written in [Go](https://www.golang.org) to poke
 environment variables into the registry.
 
-### Compile
+### Install
 
-Tested with GO 1.4.2. There are no dependencies.
+There are no dependencies.
 
 ~~~
-go build
+go get github.com/tischda/pokenv
 ~~~
 
 ### Usage
@@ -29,7 +29,7 @@ u:\>pokenv.exe -hkcu data\setvar.txt
 Setting `POKE_SECTION` to `valueline1`
 ~~~
 
-### Input format
+#### Input format
 
 The `infile` has the following format:
 
