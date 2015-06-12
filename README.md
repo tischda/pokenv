@@ -22,13 +22,19 @@ Usage: pokenv [-checkpaths] [-hkcu|-hklm] infile
   -version=false: print version and exit
 ~~~
 
+Example:
+
+~~~
+u:\>pokenv.exe -hkcu data\setvar.txt
+Setting `POKE_SECTION` to `valueline1`
+~~~
+
 ### File format
 
 The `infile` has the following format:
 
 ~~~
-# Settings Paths
-
+# This is a comment
 [Path]
 C:\Windows\SYSTEM32
 C:\Windows

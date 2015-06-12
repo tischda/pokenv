@@ -50,9 +50,9 @@ test_script:
   - go test -v -cover
   - go test -v | go2xunit -xunitnet > xunit-report.xml
   - pokenv.exe -version
-  - pokenv.exe -hkcu data\setvar.txt
-  - pokenv.exe -hkcu data\delvar.txt
+  - pokenv.exe -hkcu data\multivars.txt
   - pokenv.exe -hkcu data\testvars-pass.txt
+  - pokenv.exe -hkcu data\delvars.txt
 
 # artifacts configuration
 artifacts:
