@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"runtime"
 	"testing"
 )
 
@@ -41,16 +42,20 @@ func assertEquals(t *testing.T, expected string, actual string) {
 }
 
 func TestCheckPath(t *testing.T) {
-	paths := []string{
-		`c:\Windows`,
-		`c:\Windows\system32`,
-		`%windir%`,
-		`%windir%\system32`,
-		`.`,
-	}
-	for _, path := range paths {
-		if isPathInvalid(path) {
-			t.Errorf("Invalid path:", path)
+	if runtime.GOOS == "windows" {
+		paths := []string{
+			`c:\Windows`,
+			`c:\Windows\system32`,
+			`%windir%`,
+			`%windir%\system32`,
+			`.`,
 		}
+		for _, path := range paths {
+			if isPathInvalid(path) {
+				t.Errorf("Invalid path:", path)
+			}
+		}
+	} else {
+		t.Skip("Cannot test windows paths")
 	}
 }
