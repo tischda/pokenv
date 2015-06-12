@@ -16,7 +16,7 @@ go build
 ~~~
 Usage: pokenv [-checkpaths] [-hkcu|-hklm] infile
   infile: the input file
-  -checkpaths=false: values are paths, check that they are valid on this system
+  -checkpaths=false: values are paths, check if they are valid on this system
   -hkcu="REQUIRED": process input file into HKEY_CURRENT_USER environment
   -hklm="REQUIRED": process input file into HKEY_LOCAL_MACHINE environment
   -version=false: print version and exit
@@ -29,7 +29,7 @@ u:\>pokenv.exe -hkcu data\setvar.txt
 Setting `POKE_SECTION` to `valueline1`
 ~~~
 
-### File format
+### Input format
 
 The `infile` has the following format:
 
