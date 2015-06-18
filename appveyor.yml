@@ -9,8 +9,8 @@ branches:
 
 os: Windows Server 2012 R2
 
-environment:
-  GOPATH: c:\gopath
+#environment:
+#  GOPATH: c:\gopath
 
 init:
 - git config --global core.autocrlf input
