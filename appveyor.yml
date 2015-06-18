@@ -4,9 +4,6 @@ branches:
   only:
     - master
 
-  except:
-    - gh-pages
-
 os: Windows Server 2012 R2
 
 environment:
@@ -24,7 +21,9 @@ install:
   - go get -u github.com/tischda/go2xunit
   
 build_script:
+  - cd
   - cd %APPVEYOR_BUILD_FOLDER%
+  - cd
   - go build -o pokenv.exe
 
 test_script:
