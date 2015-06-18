@@ -9,11 +9,12 @@ branches:
 
 os: Windows Server 2012 R2
 
-#environment:
-#  GOPATH: c:\gopath
+environment:
+  GOPATH: c:\gopath
+  PATH: %GOPATH%\bin;%PATH%
 
 init:
-- git config --global core.autocrlf input
+  - git config --global core.autocrlf input
 
 install:
   - go version
