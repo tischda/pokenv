@@ -11,9 +11,9 @@ os: Windows Server 2012 R2
 
 environment:
   GOPATH: c:\gopath
-  PATH: %GOPATH%\bin;%PATH%
 
 init:
+  - SET PATH=%GOPATH%\bin;%PATH%
   - git config --global core.autocrlf input
 
 install:
