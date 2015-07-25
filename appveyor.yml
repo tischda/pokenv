@@ -21,12 +21,12 @@ install:
   - go get -u github.com/tischda/go2xunit
   
 build_script:
-  - go build -o pokenv.exe
+  - go build -ldflags "-s" -o pokenv.exe
 
 test_script:
+  - pokenv.exe -version
   - go test -v -cover
   - go test -v | go2xunit -xunitnet > xunit-report.xml
-  - pokenv.exe -version
   - pokenv.exe -hkcu data\multivars.txt
   - pokenv.exe -hkcu data\testvars-pass.txt
   - pokenv.exe -hkcu data\delvars.txt
