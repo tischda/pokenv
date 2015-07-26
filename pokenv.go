@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"io"
 )
 
 var sectionRegex = regexp.MustCompile(`^\[(.*)\]$`)
@@ -26,6 +27,15 @@ func (p *pokenv) importEnv(path regPath, fileName string) {
 	p.setVars(path)
 }
 
+func (p *pokenv) processFile(fileName string) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	p.processAllLines(file)
+}
+
 func (p *pokenv) setVars(path regPath) {
 	for variable, values := range p.environment {
 		if p.firstValueIsEmpty(values) {
@@ -39,16 +49,9 @@ func (p *pokenv) setVars(path regPath) {
 	}
 }
 
-func (p *pokenv) processFile(fileName string) {
+func (p *pokenv) processAllLines(r io.Reader) {
 	p.environment = make(map[string][]string)
-
-	file, err := os.Open(fileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
 		p.processLine(strings.TrimSpace(line))
@@ -78,14 +81,13 @@ func (p *pokenv) processSection(section string) {
 
 	// mark section as empty (required for deletion)
 	if p.environment[p.currentVariable] == nil {
-		p.addCurrent("")
+		p.addToCurrentVariable("")
 	}
 }
 
 func (p *pokenv) processValue(value string) {
 	if p.setContainsValue[value] {
-		log.Println("Fatal error: duplicate entry:", value)
-		log.Fatalln("Aborting, no value is set.")
+		log.Println("Warning: duplicate entry:", value)
 	} else {
 		if p.pathcheck {
 			if isPathInvalid(value) {
@@ -98,7 +100,7 @@ func (p *pokenv) processValue(value string) {
 			p.setContainsValue = make(map[string]bool)
 			p.setFirst(value)
 		} else {
-			p.addCurrent(value)
+			p.addToCurrentVariable(value)
 		}
 		p.setContainsValue[value] = true
 	}
@@ -112,7 +114,8 @@ func (p *pokenv) setFirst(value string) {
 	p.environment[p.currentVariable][0] = value
 }
 
-func (p *pokenv) addCurrent(value string) {
+// add value to current variable in environment
+func (p *pokenv) addToCurrentVariable(value string) {
 	p.environment[p.currentVariable] = append(p.environment[p.currentVariable], value)
 }
 

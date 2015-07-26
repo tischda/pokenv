@@ -5,6 +5,8 @@ import (
 	"log"
 	"runtime"
 	"testing"
+	"strings"
+	"os"
 )
 
 var sut pokenv
@@ -17,9 +19,58 @@ func init() {
 	log.SetOutput(ioutil.Discard)
 }
 
+func TestDuplicates(t *testing.T) {
+	contents := `[SECTION]
+	dupvalue
+	dupvalue
+	`
+	// capture output
+	r, w, _ := os.Pipe()
+	log.SetOutput(w)
+	defer func() {log.SetOutput(os.Stdout)}()
+
+	// do work
+	sut.processAllLines(strings.NewReader(contents))
+	w.Close()
+
+	// now check that message is displayed
+	captured, _ := ioutil.ReadAll(r)
+
+	actual := string(captured)
+	expected := "duplicate entry"
+
+	if !strings.Contains(actual, expected) {
+		t.Errorf("Expected: %s, but was: %s", expected, actual)
+	}
+}
+
+func TestNoDuplicates(t *testing.T) {
+	contents := `[SECTIONA]
+	nodupvalue
+	[SECTIONB]
+	nodupvalue`
+
+	// capture output
+	r, w, _ := os.Pipe()
+	log.SetOutput(w)
+	defer func() {log.SetOutput(os.Stdout)}()
+
+	// do work
+	sut.processAllLines(strings.NewReader(contents))
+	w.Close()
+
+	// now check that message is displayed
+	captured, _ := ioutil.ReadAll(r)
+
+	actual := string(captured)
+	if strings.Contains(actual, "duplicate entry") {
+		t.Errorf("No duplicates expected.")
+	}
+}
+
 func TestProcessLineValue(t *testing.T) {
 	sut.currentVariable = "TESTING"
-	sut.addCurrent("")
+	sut.addToCurrentVariable("")
 
 	sut.processLine(" value # comment")
 	assertEquals(t, "value", sut.environment[sut.currentVariable][0])

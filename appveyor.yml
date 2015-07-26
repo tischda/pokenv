@@ -1,4 +1,4 @@
-version: "1.1.1-{build}"
+version: "1.1.2-{build}"
 
 branches:
   only:
@@ -19,7 +19,7 @@ install:
   - mkdir %GOPATH%
   - go get -u golang.org/x/tools/cmd/cover
   - go get -u github.com/tischda/go2xunit
-  
+
 build_script:
   - build.bat
 
