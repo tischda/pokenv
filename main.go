@@ -24,7 +24,6 @@ func init() {
 }
 
 func main() {
-	// configure logging
 	log.SetFlags(0)
 
 	flag.Usage = func() {
@@ -41,13 +40,13 @@ func main() {
 			os.Exit(1)
 		}
 
-		// p is defined in global_xxx.go
+		// p is defined in globals_xxx.go
 
 		if hkcu != "REQUIRED" {
-			p.importEnv(PATH_USER, hkcu)
+			p.importFromFile(PATH_USER, hkcu)
 		}
 		if hklm != "REQUIRED" {
-			p.importEnv(PATH_MACHINE, hklm)
+			p.importFromFile(PATH_MACHINE, hklm)
 		}
 	}
 }

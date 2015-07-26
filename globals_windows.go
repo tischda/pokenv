@@ -3,7 +3,6 @@
 package main
 
 var p pokenv = &pokenv{
-	environment: make(map[string][]string),
-	registry:    realRegistry{},
-	pathcheck:   check,
+	registry:  realRegistry{},
+	pathcheck: check,
 }
