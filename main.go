@@ -1,5 +1,3 @@
-// +build windows
-
 package main
 
 import (
@@ -13,12 +11,19 @@ import (
 // go build -ldflags "-x main.version $(git describe --tags)"
 var version string
 
-func main() {
-	hkcu := flag.String("hkcu", "REQUIRED", "process input file into HKEY_CURRENT_USER environment")
-	hklm := flag.String("hklm", "REQUIRED", "process input file into HKEY_LOCAL_MACHINE environment")
-	check := flag.Bool("checkpaths", false, "values are paths, check if they are valid on this system")
-	showVersion := flag.Bool("version", false, "print version and exit")
+var hkcu string
+var hklm string
+var check bool
+var showVersion bool
 
+func init() {
+	flag.StringVar(&hkcu, "hkcu", "REQUIRED", "process input file into HKEY_CURRENT_USER environment")
+	flag.StringVar(&hklm, "hklm", "REQUIRED", "process input file into HKEY_LOCAL_MACHINE environment")
+	flag.BoolVar(&check, "checkpaths", false, "values are paths, check if they are valid on this system")
+	flag.BoolVar(&showVersion, "version", false, "print version and exit")
+}
+
+func main() {
 	// configure logging
 	log.SetFlags(0)
 
@@ -28,25 +33,21 @@ func main() {
 	}
 	flag.Parse()
 
-	if *showVersion {
+	if showVersion {
 		fmt.Println("pokenv version", version)
-		return
-	}
-	if flag.NFlag() < 1 {
-		flag.Usage()
-		os.Exit(1)
-	}
+	} else {
+		if flag.NFlag() < 1 {
+			flag.Usage()
+			os.Exit(1)
+		}
 
-	p := pokenv{
-		environment: make(map[string][]string),
-		registry:    realRegistry{},
-		pathcheck:   *check,
-	}
+		// p is defined in global_xxx.go
 
-	if *hkcu != "REQUIRED" {
-		p.importEnv(PATH_USER, *hkcu)
-	}
-	if *hklm != "REQUIRED" {
-		p.importEnv(PATH_MACHINE, *hklm)
+		if hkcu != "REQUIRED" {
+			p.importEnv(PATH_USER, hkcu)
+		}
+		if hklm != "REQUIRED" {
+			p.importEnv(PATH_MACHINE, hklm)
+		}
 	}
 }
