@@ -41,3 +41,9 @@ func TestCheckPath(t *testing.T) {
 		t.Skip("Cannot test windows paths")
 	}
 }
+
+func assertEquals(t *testing.T, expected string, actual string) {
+	if actual != expected {
+		t.Errorf("Expected: %q, was: %q", expected, actual)
+	}
+}

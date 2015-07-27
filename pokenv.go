@@ -21,7 +21,7 @@ func (p *pokenv) importFromFile(path regPath, fileName string) {
 	p.setVars(path, env)
 }
 
-func (p *pokenv) processFile(fileName string) environment {
+func (p *pokenv) processFile(fileName string) varMap {
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
@@ -31,7 +31,7 @@ func (p *pokenv) processFile(fileName string) environment {
 	return parser.processAllLines(file)
 }
 
-func (p *pokenv) setVars(path regPath, env environment) {
+func (p *pokenv) setVars(path regPath, env varMap) {
 	for variable, values := range env {
 		if firstValueIsEmpty(values) {
 			log.Println("Deleting", variable)
@@ -59,4 +59,8 @@ func isPathInvalid(value string) bool {
 	}
 	_, err := os.Stat(filename)
 	return err != nil
+}
+
+func firstValueIsEmpty(values []string) bool {
+	return values[0] == ""
 }

@@ -4,19 +4,78 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
 
-var sut_parser parser
+var sutParser parser
 
 func init() {
-	sut_parser = parser{}
+	sutParser = parser{}
 	log.SetOutput(ioutil.Discard)
 }
 
+func parseContents(contents string) varMap {
+	return sutParser.processAllLines(strings.NewReader(contents))
+}
+
+func TestSimple(t *testing.T) {
+	contents := `[SECTION-S]
+	value1
+	value2
+	`
+	expected := varMap{"SECTION-S": {"value1", "value2"}}
+	assertDeepEquals(t, expected, parseContents(contents))
+}
+
+func TestOrphan(t *testing.T) {
+	contents := `value1
+	[SECTION-O]
+	value2
+	`
+	expected := varMap{"SECTION-O": {"value2"}}
+	assertDeepEquals(t, expected, parseContents(contents))
+}
+
+func TestDouble(t *testing.T) {
+	contents := `[SECTION-D]
+	value1
+	[SECTION-D]
+	value2
+	`
+	expected := varMap{"SECTION-D": {"value1", "value2"}}
+	assertDeepEquals(t, expected, parseContents(contents))
+}
+
+func TestDoubleEmpty(t *testing.T) {
+	contents := `[SECTION-DE]
+	[SECTION-DE]
+	value2
+	`
+	expected := varMap{"SECTION-DE": {"value2"}}
+	assertDeepEquals(t, expected, parseContents(contents))
+
+	contents = `[SECTION-DE]
+	value1
+	[SECTION-DE]`
+	expected = varMap{"SECTION-DE": {"value1"}}
+	assertDeepEquals(t, expected, parseContents(contents))
+
+	contents = `[SECTION-DE]
+	[SECTION-DE]`
+	expected = varMap{"SECTION-DE": {}}
+	assertDeepEquals(t, expected, parseContents(contents))
+}
+
+func TestEmpty(t *testing.T) {
+	contents := `[SECTION-E]`
+	expected := varMap{"SECTION-E": {}}
+	assertDeepEquals(t, expected, parseContents(contents))
+}
+
 func TestDuplicates(t *testing.T) {
-	contents := `[SECTION]
+	contents := `[SECTION-D]
 	dupvalue
 	dupvalue
 	`
@@ -26,7 +85,7 @@ func TestDuplicates(t *testing.T) {
 	defer func() { log.SetOutput(os.Stdout) }()
 
 	// do work
-	sut_parser.processAllLines(strings.NewReader(contents))
+	parseContents(contents)
 	w.Close()
 
 	// now check that message is displayed
@@ -41,9 +100,9 @@ func TestDuplicates(t *testing.T) {
 }
 
 func TestNoDuplicates(t *testing.T) {
-	contents := `[SECTIONA]
+	contents := `[SECTION-A]
 	nodupvalue
-	[SECTIONB]
+	[SECTION-B]
 	nodupvalue`
 
 	// capture output
@@ -52,33 +111,18 @@ func TestNoDuplicates(t *testing.T) {
 	defer func() { log.SetOutput(os.Stdout) }()
 
 	// do work
-	sut_parser.processAllLines(strings.NewReader(contents))
+	parseContents(contents)
 	w.Close()
 
-	// now check that message is displayed
 	captured, _ := ioutil.ReadAll(r)
-
 	actual := string(captured)
 	if strings.Contains(actual, "duplicate entry") {
 		t.Errorf("No duplicates expected.")
 	}
 }
 
-func TestProcessLineValue(t *testing.T) {
-	sut_parser.currentVariable = "TESTING"
-	sut_parser.addToCurrentVariable("")
-
-	sut_parser.processLine(" value # comment")
-	assertEquals(t, "value", sut_parser.env[sut_parser.currentVariable][0])
-}
-
-func TestProcessLineSection(t *testing.T) {
-	sut_parser.processLine("[ A SECTION ]")
-	assertEquals(t, "ASECTION", sut_parser.currentVariable)
-}
-
-func assertEquals(t *testing.T, expected string, actual string) {
-	if actual != expected {
+func assertDeepEquals(t *testing.T, expected varMap, actual varMap) {
+	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Expected: %q, was: %q", expected, actual)
 	}
 }
