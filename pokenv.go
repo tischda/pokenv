@@ -16,9 +16,11 @@ type pokenv struct {
 }
 
 func (p *pokenv) importFromFile(path regPath, fileName string) {
-	env := p.processFile(fileName)
-	// validate paths if pathcheck
-	p.setVars(path, env)
+	vars := p.processFile(fileName)
+
+	// TODO: validate paths if pathcheck
+
+	p.setVars(path, vars)
 }
 
 func (p *pokenv) processFile(fileName string) varMap {
@@ -31,9 +33,9 @@ func (p *pokenv) processFile(fileName string) varMap {
 	return parser.processAllLines(file)
 }
 
-func (p *pokenv) setVars(path regPath, env varMap) {
-	for variable, values := range env {
-		if firstValueIsEmpty(values) {
+func (p *pokenv) setVars(path regPath, vars varMap) {
+	for variable, values := range vars {
+		if len(values) == 0 {
 			log.Println("Deleting", variable)
 			p.registry.DeleteValue(path, variable)
 		} else {
@@ -59,8 +61,4 @@ func isPathInvalid(value string) bool {
 	}
 	_, err := os.Stat(filename)
 	return err != nil
-}
-
-func firstValueIsEmpty(values []string) bool {
-	return values[0] == ""
 }

@@ -17,13 +17,15 @@ func init() {
 }
 
 func TestProcessTestFile(t *testing.T) {
-	t.Skip("not implemented")
 	sut_pokenv.importFromFile(PATH_MACHINE, `data/setvar.txt`)
-	assertEquals(t, "valueline1", mock.env["POKE_SECTION"])
+	expected := "valueline1"
+	actual := mock.env["POKE_SECTION"]
+	if actual != expected {
+		t.Errorf("Expected: %q, was: %q", expected, actual)
+	}
 }
 
 func TestCheckPath(t *testing.T) {
-	t.Skip("not implemented")
 	if runtime.GOOS == "windows" {
 		paths := []string{
 			`c:\Windows`,
@@ -39,11 +41,5 @@ func TestCheckPath(t *testing.T) {
 		}
 	} else {
 		t.Skip("Cannot test windows paths")
-	}
-}
-
-func assertEquals(t *testing.T, expected string, actual string) {
-	if actual != expected {
-		t.Errorf("Expected: %q, was: %q", expected, actual)
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -123,20 +122,24 @@ func TestNoDuplicates(t *testing.T) {
 }
 
 func assertDeepEquals(t *testing.T, expected varMap, actual varMap) {
-	if !reflect.DeepEqual(actual, expected) {
+	if !deepEqual(actual, expected) {
 		t.Errorf("Expected: %q, was: %q", expected, actual)
 	}
 }
 
 // reflect.DeepEqual(m1, m2) breaks because
-// order of values in maps is random.
+// order of values in maps is randomized.
 func deepEqual(v1 varMap, v2 varMap) bool {
+
+	// check sections
 	if (v1 == nil) != (v2 == nil) {
 		return false
 	}
 	if len(v1) != len(v2) {
 		return false
 	}
+
+	// for each section, check values
 	for k, s1 := range v1 {
 		s2 := v2[k]
 		if len(s1) != len(s2) {
