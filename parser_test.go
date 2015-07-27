@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -125,4 +126,29 @@ func assertDeepEquals(t *testing.T, expected varMap, actual varMap) {
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Expected: %q, was: %q", expected, actual)
 	}
+}
+
+// reflect.DeepEqual(m1, m2) breaks because
+// order of values in maps is random.
+func deepEqual(v1 varMap, v2 varMap) bool {
+	if (v1 == nil) != (v2 == nil) {
+		return false
+	}
+	if len(v1) != len(v2) {
+		return false
+	}
+	for k, s1 := range v1 {
+		s2 := v2[k]
+		if len(s1) != len(s2) {
+			return false
+		}
+		sort.Strings(s1)
+		sort.Strings(s2)
+		for i, v := range s1 {
+			if s2[i] != v {
+				return false
+			}
+		}
+	}
+	return true
 }
