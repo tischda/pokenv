@@ -2,7 +2,7 @@
 
 package main
 
-var p pokenv = &pokenv{
+var p pokenv = pokenv{
 	registry:  realRegistry{},
 	pathcheck: check,
 }
