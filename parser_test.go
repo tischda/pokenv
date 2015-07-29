@@ -13,7 +13,6 @@ var sutParser parser
 
 func init() {
 	sutParser = parser{}
-	log.SetOutput(ioutil.Discard)
 }
 
 func parseContents(contents string) varMap {

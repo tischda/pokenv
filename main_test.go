@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestMainTimer(t *testing.T) {
+func TestMainPokenv(t *testing.T) {
 	args := []string{"-version"}
 	os.Args = append(os.Args, args...)
 

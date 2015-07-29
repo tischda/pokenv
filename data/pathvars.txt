@@ -3,5 +3,4 @@ c:\Windows
 c:\Windows\system32
 %windir%
 %windir%\system32
-.
-errorpath
+youfail

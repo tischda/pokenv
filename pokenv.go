@@ -17,9 +17,13 @@ type pokenv struct {
 
 func (p *pokenv) importFromFile(path regPath, fileName string) {
 	vars := p.processFile(fileName)
-
-	// TODO: validate paths if pathcheck
-
+	if p.pathcheck {
+		for _, path := range values(vars) {
+			if isPathInvalid(path) {
+				log.Fatalln("Invalid path:", path)
+			}
+		}
+	}
 	p.setVars(path, vars)
 }
 
@@ -46,12 +50,6 @@ func (p *pokenv) setVars(path regPath, vars varMap) {
 	}
 }
 
-//if p.pathcheck {
-//	if isPathInvalid(value) {
-//		log.Fatalln("Invalid path:", value)
-//	}
-//}
-
 func isPathInvalid(value string) bool {
 	var filename = value
 	for strings.Contains(filename, "%") {
@@ -61,4 +59,13 @@ func isPathInvalid(value string) bool {
 	}
 	_, err := os.Stat(filename)
 	return err != nil
+}
+
+func values(m varMap) []string {
+	v := make([]string, 1)
+
+	for  _, lines := range m {
+		v = append(v, lines...)
+	}
+	return v
 }
