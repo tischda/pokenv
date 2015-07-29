@@ -10,9 +10,7 @@ import (
 
 var isSectionRegex = regexp.MustCompile(`^\[(.*)\]$`)
 
-// TODO: reused in pokenv
 type varMap map[string][]string
-
 type stringSet map[string]bool
 
 type parser struct {
@@ -22,13 +20,16 @@ type parser struct {
 }
 
 func (p *parser) processAllLines(r io.Reader) varMap {
+	p.cleanUp()
 	p.vars = make(varMap)
+
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
 		p.processLine(strings.TrimSpace(line))
 	}
-	p.setVars()
+	p.closePreviousSectionIfEmpty()
+	p.cleanUp()
 	return p.vars
 }
 
@@ -51,15 +52,14 @@ func (p *parser) processLine(line string) {
 }
 
 func (p *parser) processSection(section string) {
-
-	// new section, dump recorded contents to vars
-	p.setVars()
+	// this is new section, close previous
+	p.closePreviousSectionIfEmpty()
 
 	// start clean
 	p.currentVar = trimSpaces(section)
 	p.currentSet = make(stringSet)
 
-	// already had that section ?
+	// if section exists, restore duplicates list
 	values := p.vars[p.currentVar]
 	if values != nil {
 		for _, v := range values {
@@ -76,42 +76,20 @@ func (p *parser) processValue(value string) {
 		if p.currentSet[value] {
 			log.Println("Warning: duplicate entry:", value)
 		} else {
+			p.vars[p.currentVar] = append(p.vars[p.currentVar], value)
 			p.currentSet[value] = true
 		}
 	}
 }
 
-// Copies the parsed variable to the parser's varMap.
-func (p *parser) setVars() {
-	if p.currentVar != "" {
-		p.vars[p.currentVar] = keys(p.currentSet)
-		p.currentVar = ""
-		p.currentSet = nil
+// If section is empty, add empty list to mark for deletion.
+func (p *parser) closePreviousSectionIfEmpty() {
+	if p.currentVar != "" && len(p.currentSet) == 0 {
+		p.vars[p.currentVar] = []string{}
 	}
 }
 
-// ------------------ utility
-
-// If there is a comment in the line, return only
-// content to the left of the comment marker '#'.
-func trimComments(s string) string {
-	if idx := strings.Index(s, "#"); idx != -1 {
-		return strings.TrimSpace(s[:idx])
-	}
-	return s
-}
-
-// Remove all spaces in line.
-func trimSpaces(s string) string {
-	return strings.Replace(s, " ", "", -1)
-}
-
-func keys(set stringSet) []string {
-	keys := make([]string, len(set))
-	i := 0
-	for k := range set {
-		keys[i] = k
-		i += 1
-	}
-	return keys
+func (p *parser) cleanUp() {
+	p.currentVar = ""
+	p.currentSet = nil
 }

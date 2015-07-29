@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"sort"
 	"strings"
 	"testing"
+	"reflect"
 )
 
 var sutParser parser
@@ -28,6 +28,24 @@ func TestSimple(t *testing.T) {
 	expected := varMap{"SECTION-S": {"value1", "value2"}}
 	assertDeepEquals(t, expected, parseContents(contents))
 }
+
+func TestOrdered(t *testing.T) {
+	contents := `[SECTION-R]
+	1
+	2
+	3
+	4
+	5
+	6
+	7
+	8
+	9
+	10
+	`
+	expected := varMap{"SECTION-R": {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}}
+	assertDeepEquals(t, expected, parseContents(contents))
+}
+
 
 func TestOrphan(t *testing.T) {
 	contents := `value1
@@ -68,11 +86,21 @@ func TestDoubleEmpty(t *testing.T) {
 	assertDeepEquals(t, expected, parseContents(contents))
 }
 
-func TestEmpty(t *testing.T) {
+func TestEmptySingle(t *testing.T) {
 	contents := `[SECTION-E]`
 	expected := varMap{"SECTION-E": {}}
 	assertDeepEquals(t, expected, parseContents(contents))
 }
+
+func TestEmptyNotLast(t *testing.T) {
+	contents := `[SECTION-ENL]
+	[SECTION-OTHER]
+	value
+	`
+	expected := varMap{"SECTION-ENL": {}, "SECTION-OTHER": {"value"}}
+	assertDeepEquals(t, expected, parseContents(contents))
+}
+
 
 func TestDuplicates(t *testing.T) {
 	contents := `[SECTION-D]
@@ -122,36 +150,7 @@ func TestNoDuplicates(t *testing.T) {
 }
 
 func assertDeepEquals(t *testing.T, expected varMap, actual varMap) {
-	if !deepEqual(actual, expected) {
+	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Expected: %q, was: %q", expected, actual)
 	}
-}
-
-// reflect.DeepEqual(m1, m2) breaks because
-// order of values in maps is randomized.
-func deepEqual(v1 varMap, v2 varMap) bool {
-
-	// check sections
-	if (v1 == nil) != (v2 == nil) {
-		return false
-	}
-	if len(v1) != len(v2) {
-		return false
-	}
-
-	// for each section, check values
-	for k, s1 := range v1 {
-		s2 := v2[k]
-		if len(s1) != len(s2) {
-			return false
-		}
-		sort.Strings(s1)
-		sort.Strings(s2)
-		for i, v := range s1 {
-			if s2[i] != v {
-				return false
-			}
-		}
-	}
-	return true
 }
