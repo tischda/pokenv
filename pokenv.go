@@ -50,6 +50,8 @@ func (p *pokenv) setVars(path regPath, vars varMap) {
 	}
 }
 
+// checks if path is valid. Does Windows variable expansion
+// so that '%windir%' resolves to 'c:\Windows'.
 func isPathInvalid(value string) bool {
 	var filename = value
 	for strings.Contains(filename, "%") {
@@ -64,7 +66,7 @@ func isPathInvalid(value string) bool {
 func values(m varMap) []string {
 	v := make([]string, 1)
 
-	for  _, lines := range m {
+	for _, lines := range m {
 		v = append(v, lines...)
 	}
 	return v

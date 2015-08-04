@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
-	"reflect"
 )
 
 var sutParser parser
@@ -45,13 +45,14 @@ func TestOrdered(t *testing.T) {
 	assertDeepEquals(t, expected, parseContents(contents))
 }
 
-
 func TestOrphan(t *testing.T) {
 	contents := `value1
 	[SECTION-O]
 	value2
 	`
 	expected := varMap{"SECTION-O": {"value2"}}
+	log.SetOutput(ioutil.Discard)
+	defer log.SetOutput(os.Stdout)
 	assertDeepEquals(t, expected, parseContents(contents))
 }
 
@@ -99,7 +100,6 @@ func TestEmptyNotLast(t *testing.T) {
 	expected := varMap{"SECTION-ENL": {}, "SECTION-OTHER": {"value"}}
 	assertDeepEquals(t, expected, parseContents(contents))
 }
-
 
 func TestDuplicates(t *testing.T) {
 	contents := `[SECTION-D]
