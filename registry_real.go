@@ -24,7 +24,7 @@ var hKeyTable = []syscall.Handle{
 
 // Writes a string to the Windows registry. Type is set to REG_EXPAND_SZ when
 // the value contains "%", otherwise it will use REG_SZ.
-func (realRegistry) SetString(path regPath, valueName string, value string) error {
+func (realRegistry) SetString(path regKey, valueName string, value string) error {
 	handle := openKey(path, syscall.KEY_SET_VALUE)
 	defer syscall.RegCloseKey(handle)
 
@@ -46,7 +46,7 @@ func (realRegistry) SetString(path regPath, valueName string, value string) erro
 
 // Read string from Windows registry (no expansion).
 // Thanks to http://npf.io/2012/11/go-win-stuff/
-func (realRegistry) GetString(path regPath, valueName string) (value string, err error) {
+func (realRegistry) GetString(path regKey, valueName string) (value string, err error) {
 	handle := openKey(path, syscall.KEY_QUERY_VALUE)
 	defer syscall.RegCloseKey(handle)
 
@@ -83,7 +83,7 @@ func (realRegistry) GetString(path regPath, valueName string) (value string, err
 }
 
 // Deletes a key value from the Windows registry.
-func (realRegistry) DeleteValue(path regPath, valueName string) error {
+func (realRegistry) DeleteValue(path regKey, valueName string) error {
 	handle := openKey(path, syscall.KEY_SET_VALUE)
 	defer syscall.RegCloseKey(handle)
 
@@ -92,7 +92,7 @@ func (realRegistry) DeleteValue(path regPath, valueName string) error {
 
 // Opens a Windows registry key and returns a handle. You must close
 // the handle with `defer syscall.RegCloseKey(handle)` in the calling code.
-func openKey(path regPath, desiredAccess uint32) syscall.Handle {
+func openKey(path regKey, desiredAccess uint32) syscall.Handle {
 	var handle syscall.Handle
 
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms724897(v=vs.85).aspx
@@ -107,14 +107,4 @@ func openKey(path regPath, desiredAccess uint32) syscall.Handle {
 		log.Fatalln("Cannot open registry path:", path)
 	}
 	return handle
-}
-
-// https://golang.org/src/syscall/syscall_windows.go
-// syscall.StringToUTF16Ptr is deprecated, this is our own:
-func StringToUTF16Ptr(s string) *uint16 {
-	a, err := syscall.UTF16FromString(s)
-	if err != nil {
-		log.Fatalln("String with NULL passed to StringToUTF16")
-	}
-	return &a[0]
 }

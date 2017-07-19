@@ -2,7 +2,8 @@
 
 package main
 
-var p pokenv = pokenv{
-	registry:  mockRegistry{},
-	pathcheck: check,
+var registry = mockRegistry{}
+
+func refresh() {
+	// noop
 }

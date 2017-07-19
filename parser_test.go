@@ -16,7 +16,7 @@ func init() {
 }
 
 func parseContents(contents string) varMap {
-	return sutParser.processAllLines(strings.NewReader(contents))
+	return sutParser.parse(strings.NewReader(contents))
 }
 
 func TestSimple(t *testing.T) {

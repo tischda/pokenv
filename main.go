@@ -7,46 +7,62 @@ import (
 	"os"
 )
 
-// http://technosophos.com/2014/06/11/compile-time-string-in-go.html
-// go build -ldflags "-x main.version $(git describe --tags)"
 var version string
 
-var hkcu string
-var hklm string
-var check bool
-var showVersion bool
+var file_name string
+var flag_help = flag.Bool("help", false, "displays this help message")
+var flag_machine = flag.Bool("machine", false, "specifies that the variables should be set system wide (HKEY_LOCAL_MACHINE)")
+var flag_check = flag.Bool("checkpaths", false, "check if values are valid paths on this system")
+var flag_version = flag.Bool("version", false, "print version and exit")
 
 func init() {
-	flag.StringVar(&hkcu, "hkcu", "REQUIRED", "process input file into HKEY_CURRENT_USER environment")
-	flag.StringVar(&hklm, "hklm", "REQUIRED", "process input file into HKEY_LOCAL_MACHINE environment")
-	flag.BoolVar(&check, "checkpaths", false, "values are paths, check if they are valid on this system")
-	flag.BoolVar(&showVersion, "version", false, "print version and exit")
+	flag.BoolVar(flag_help, "h", false, "")
+	flag.BoolVar(flag_machine, "m", false, "")
+	flag.BoolVar(flag_check, "c", false, "")
+	flag.BoolVar(flag_version, "v", false, "")
+	flag.StringVar(&file_name, "f", "REQUIRED", "file containing the variables to load into the Windows environment")
 }
 
 func main() {
 	log.SetFlags(0)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-checkpaths] [-hkcu|-hklm] infile\n  infile: the input file\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [-h] [-c] [-m] [-f infile]\n\nOPTIONS:\n", os.Args[0])
 		flag.PrintDefaults()
 	}
 	flag.Parse()
 
-	if showVersion {
+	if *flag_version {
 		fmt.Println("pokenv version", version)
 	} else {
-		if flag.NFlag() < 1 {
+		if *flag_help || flag.NArg() > 0 {
 			flag.Usage()
 			os.Exit(1)
 		}
+		process()
+	}
+}
 
-		// p is defined in globals_xxx.go
+func process() {
+	var file *os.File
 
-		if hkcu != "REQUIRED" {
-			p.importFromFile(PATH_USER, hkcu)
-		}
-		if hklm != "REQUIRED" {
-			p.importFromFile(PATH_MACHINE, hklm)
+	if file_name == "REQUIRED" {
+		file = os.Stdin
+	} else {
+		var err error
+		file, err = os.Open(file_name)
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
+	defer file.Close()
+
+	pokenv := pokenv{registry: registry, checkPath: *flag_check}
+
+	if *flag_machine {
+		pokenv.processFile(REG_KEY_MACHINE, file)
+	} else {
+		pokenv.processFile(REG_KEY_USER, file)
+	}
+	refreshEnvironment()
 }

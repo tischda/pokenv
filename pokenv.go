@@ -1,73 +1,73 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 )
 
-var PATH_USER = regPath{HKEY_CURRENT_USER, `Environment`}
-var PATH_MACHINE = regPath{HKEY_LOCAL_MACHINE, `SYSTEM\CurrentControlSet\Control\Session Manager\Environment`}
+var REG_KEY_USER = regKey{HKEY_CURRENT_USER, `Environment`}
+
+// TODO: access to this key requires admin rights (cf. https://github.com/mozey/run-as-admin)
+var REG_KEY_MACHINE = regKey{HKEY_LOCAL_MACHINE, `SYSTEM\CurrentControlSet\Control\Session Manager\Environment`}
 
 type pokenv struct {
 	registry  Registry
-	pathcheck bool
+	checkPath bool
 }
 
-func (p *pokenv) importFromFile(path regPath, fileName string) {
-	vars := p.processFile(fileName)
-	if p.pathcheck {
-		for _, path := range values(vars) {
-			if isPathInvalid(path) {
-				log.Fatalln("Invalid path:", path)
-			}
-		}
-	}
-	p.setVars(path, vars)
-}
-
-func (p *pokenv) processFile(fileName string) varMap {
-	file, err := os.Open(fileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
+func (p *pokenv) processFile(reg regKey, file *os.File) {
 	parser := &parser{}
-	return parser.processAllLines(file)
+	vars := parser.parse(file)
+	ok := true
+	if p.checkPath {
+		ok = assertValuesAreValidPaths(&vars)
+	}
+	if ok {
+		p.setVars(reg, vars)
+	}
 }
 
-func (p *pokenv) setVars(path regPath, vars varMap) {
+func (p *pokenv) setVars(reg regKey, vars varMap) {
 	for variable, values := range vars {
 		if len(values) == 0 {
 			log.Println("Deleting", variable)
-			p.registry.DeleteValue(path, variable)
+			p.registry.DeleteValue(reg, variable)
 		} else {
 			joined := strings.Join(values, ";")
 			log.Printf("Setting `%s` to `%s`\n", variable, joined)
-			p.registry.SetString(path, variable, joined)
+			p.registry.SetString(reg, variable, joined)
 		}
 	}
 }
 
-// checks if path is valid. Does Windows variable expansion
-// so that '%windir%' resolves to 'c:\Windows'.
-func isPathInvalid(value string) bool {
-	var filename = value
-	for strings.Contains(filename, "%") {
+// checks if path is valid.
+// Does Windows variable expansion so that '%windir%' resolves to 'c:\Windows'.
+func isPathInvalid(path string) bool {
+	for strings.Contains(path, "%") {
 		regexp := regexp.MustCompile(`(.*)%(.*)%(.*)`)
-		parts := regexp.FindStringSubmatch(filename)
-		filename = parts[1] + os.ExpandEnv("${"+parts[2]+"}") + parts[3]
+		parts := regexp.FindStringSubmatch(path)
+		path = parts[1] + os.ExpandEnv("${"+parts[2]+"}") + parts[3]
 	}
-	_, err := os.Stat(filename)
+	_, err := os.Stat(path)
 	return err != nil
 }
 
-func values(m varMap) []string {
-	v := make([]string, 1)
-
-	for _, lines := range m {
-		v = append(v, lines...)
+// checks all values in the vars map assuming they are valid paths (all values are checked)
+// returns:
+// * false if at least one path is invalid
+// * true if all values are valid paths
+func assertValuesAreValidPaths(vars *varMap) bool {
+	ret := true
+	for key, value := range *vars {
+		for _, line := range value {
+			if isPathInvalid(line) {
+				log.Print(fmt.Sprintf("Invalid path in section [%s]: %s\n", key, line))
+				ret = false
+			}
+		}
 	}
-	return v
+	return ret
 }

@@ -13,13 +13,13 @@ func TestSetDeleteValue(t *testing.T) {
 	expected := "titi"
 
 	// set value
-	err := registry.SetString(PATH_USER, "toto", expected)
+	err := registry.SetString(REG_KEY_USER, "toto", expected)
 	if err != nil {
 		t.Errorf("Error in SetString", err)
 	}
 
 	// read value
-	actual, err := registry.GetString(PATH_USER, "toto")
+	actual, err := registry.GetString(REG_KEY_USER, "toto")
 	if err != nil {
 		t.Errorf("Error in GetString", err)
 	}
@@ -28,7 +28,7 @@ func TestSetDeleteValue(t *testing.T) {
 	}
 
 	// delete value
-	err = registry.DeleteValue(PATH_USER, "toto")
+	err = registry.DeleteValue(REG_KEY_USER, "toto")
 	if err != nil {
 		t.Errorf("Error in DeleteValue", err)
 	}

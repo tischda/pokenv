@@ -1,5 +1,12 @@
 ## Changelog
  
+
+##### pokenv 2.0.0 - (19 July 2017)
+
+    * Simplify options
+    * Allow stdin
+    * Refresh environment via WM_SETTINGCHANGED
+  
 ##### pokenv 1.1.1 - (12 June 2015)
 
     * Fix handling of sections that appear twice

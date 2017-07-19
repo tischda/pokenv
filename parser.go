@@ -19,21 +19,21 @@ type parser struct {
 	currentSet stringSet
 }
 
-func (p *parser) processAllLines(r io.Reader) varMap {
+func (p *parser) parse(r io.Reader) varMap {
 	p.cleanUp()
 	p.vars = make(varMap)
 
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
-		p.processLine(strings.TrimSpace(line))
+		p.parseLine(strings.TrimSpace(line))
 	}
 	p.closePreviousSectionIfEmpty()
 	p.cleanUp()
 	return p.vars
 }
 
-func (p *parser) processLine(line string) {
+func (p *parser) parseLine(line string) {
 	// ignore blank line
 	if line == "" {
 		return
@@ -45,13 +45,13 @@ func (p *parser) processLine(line string) {
 	// sections and values
 	match := isSectionRegex.FindStringSubmatch(line)
 	if match != nil {
-		p.processSection(match[1])
+		p.parseSection(match[1])
 	} else {
-		p.processValue(line)
+		p.parseValue(line)
 	}
 }
 
-func (p *parser) processSection(section string) {
+func (p *parser) parseSection(section string) {
 	// this is new section, close previous
 	p.closePreviousSectionIfEmpty()
 
@@ -68,9 +68,9 @@ func (p *parser) processSection(section string) {
 	}
 }
 
-func (p *parser) processValue(value string) {
+func (p *parser) parseValue(value string) {
 	if p.currentVar == "" {
-		log.Println("Orphan line (not in section):", value)
+		log.Println("Error: orphan line (not in section):", value)
 	} else {
 		value = trimComments(value)
 		if p.currentSet[value] {

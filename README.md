@@ -14,24 +14,47 @@ go get github.com/tischda/pokenv
 ### Usage
 
 ~~~
-Usage: pokenv [-checkpaths] [-hkcu|-hklm] infile
-  infile: the input file
-  -checkpaths=false: values are paths, check if they are valid on this system
-  -hkcu="REQUIRED": process input file into HKEY_CURRENT_USER environment
-  -hklm="REQUIRED": process input file into HKEY_LOCAL_MACHINE environment
-  -version=false: print version and exit
+Usage: pokenv [-h] [-c] [-m] [-f infile]
+
+OPTIONS:
+  -c
+  -checkpaths
+        check if values are valid paths on this system
+  -f string
+        file containing the variables to load into the Windows environment (default "REQUIRED")
+  -h
+  -help
+        displays this help message
+  -m
+  -machine
+        specifies that the variables should be set system wide (HKEY_LOCAL_MACHINE)
+  -v
+  -version
+        print version and exit
 ~~~
 
-Example:
+Examples:
 
 ~~~
-u:\>pokenv.exe -hkcu data\setvar.txt
+# pokenv.exe -f data\setvar.txt
 Setting `POKE_SECTION` to `valueline1`
+
+# pokenv.exe
+[MYVAR]
+value1
+value2
+^Z
+Setting `MYVAR` to `value1;value2`
+
+# pokenv.exe
+[MYVAR]
+^Z
+Deleting MYVAR
 ~~~
 
 #### Input format
 
-The `infile` has the following format:
+The input file has the following format:
 
 ~~~
 # This is a comment

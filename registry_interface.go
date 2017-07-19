@@ -3,7 +3,7 @@ package main
 // A registry path is composed of an hKey index and the string representation
 // of the path withing that hKey. We use hKey indexes to avoid dependency on
 // non-portable syscall values.
-type regPath struct {
+type regKey struct {
 	hKeyIdx  uint8
 	lpSubKey string
 }
@@ -20,6 +20,6 @@ const (
 )
 
 type Registry interface {
-	DeleteValue(path regPath, valueName string) error
-	SetString(path regPath, valueName string, value string) error
+	DeleteValue(path regKey, valueName string) error
+	SetString(path regKey, valueName string, value string) error
 }
