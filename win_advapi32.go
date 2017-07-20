@@ -38,8 +38,7 @@ func regSetValueEx(hKey syscall.Handle, lpValueName *uint16, Reserved uint32, dw
 func regDeleteValue(hKey syscall.Handle, lpValueName *uint16) (regerrno error) {
 	ret, _, _ := procRegDeleteValueW.Call(
 		uintptr(hKey),
-		uintptr(unsafe.Pointer(lpValueName)),
-		0)
+		uintptr(unsafe.Pointer(lpValueName)))
 
 	// If the function fails, the return value is a nonzero error code defined in Winerror.h
 	if ret != 0 {
