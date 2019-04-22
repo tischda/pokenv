@@ -47,7 +47,7 @@ func TestCheckPath(t *testing.T) {
 	}
 	for _, path := range paths {
 		if isPathInvalid(path) {
-			t.Errorf("Invalid path:", path)
+			t.Errorf("Invalid path: %q", path)
 		}
 	}
 }
