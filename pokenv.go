@@ -18,27 +18,41 @@ type pokenv struct {
 	checkPath bool
 }
 
-func (p *pokenv) processFile(reg regKey, file *os.File) {
-	parser := &parser{}
-	vars := parser.parse(file)
-	ok := true
-	if p.checkPath {
-		ok = assertValuesAreValidPaths(&vars)
-	}
-	if ok {
+func (p *pokenv) processFile(reg regKey, fileName string) {
+	vars := p.parseFile(fileName)
+
+	if !p.checkPath || assertValuesAreValidPaths(&vars) {
 		p.setVars(reg, vars)
 	}
+}
+
+func (p *pokenv) parseFile(fileName string) varMap {
+	var file *os.File
+
+	if fileName == "REQUIRED" {
+		file = os.Stdin
+	} else {
+		var err error
+		file, err = os.Open(fileName) // O_RDONLY mode
+		checkFatal(err)
+	}
+	defer file.Close()
+
+	var parser = &parser{}
+	return parser.parse(file)
 }
 
 func (p *pokenv) setVars(reg regKey, vars varMap) {
 	for variable, values := range vars {
 		if len(values) == 0 {
 			log.Println("Deleting", variable)
-			p.registry.DeleteValue(reg, variable)
+			err := p.registry.DeleteValue(reg, variable)
+			checkFatal(err)
 		} else {
 			joined := strings.Join(values, ";")
 			log.Printf("Setting `%s` to `%s`\n", variable, joined)
-			p.registry.SetString(reg, variable, joined)
+			err := p.registry.SetString(reg, variable, joined)
+			checkFatal(err)
 		}
 	}
 }
@@ -47,8 +61,8 @@ func (p *pokenv) setVars(reg regKey, vars varMap) {
 // Does Windows variable expansion so that '%windir%' resolves to 'c:\Windows'.
 func isPathInvalid(path string) bool {
 	for strings.Contains(path, "%") {
-		regexp := regexp.MustCompile(`(.*)%(.*)%(.*)`)
-		parts := regexp.FindStringSubmatch(path)
+		exp := regexp.MustCompile(`(.*)%(.*)%(.*)`)
+		parts := exp.FindStringSubmatch(path)
 		path = parts[1] + os.ExpandEnv("${"+parts[2]+"}") + parts[3]
 	}
 	_, err := os.Stat(path)

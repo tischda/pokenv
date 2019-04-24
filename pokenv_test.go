@@ -17,8 +17,7 @@ func TestProcessTestFile(t *testing.T) {
 	defer log.SetOutput(os.Stdout)
 
 	sut_pokenv = pokenv{registry: mock}
-	file, _ := os.Open(`data/setvar.txt`)
-	sut_pokenv.processFile(REG_KEY_MACHINE, file)
+	sut_pokenv.processFile(REG_KEY_MACHINE, `data/setvar.txt`)
 	expected := "valueline1"
 	actual := mock.env["POKE_SECTION"]
 	if actual != expected {
@@ -57,8 +56,7 @@ func TestParseAndCheckPaths(t *testing.T) {
 	if os.Getenv("BE_CRASHER") == "1" {
 		log.SetFlags(0)
 		sut_pokenv = pokenv{registry: mock, checkPath: true}
-		file, _ := os.Open(`data/pathvars.txt`)
-		sut_pokenv.processFile(REG_KEY_MACHINE, file)
+		sut_pokenv.processFile(REG_KEY_MACHINE, `data/pathvars.txt`)
 		return
 	}
 	cmd := exec.Command(os.Args[0], "-test.run=TestParseAndCheckPaths")

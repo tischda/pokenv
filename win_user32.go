@@ -27,7 +27,7 @@ const (
 	SMTO_ABORTIFHUNG = 0x0002
 )
 
-// https://github.com/AllenDang/w32/blob/master/user32.go#L318
+// https://github.com/AllenDang/w32/blob/master/user32.go#L316
 func SendMessageTimeout(hwnd HWND, msg uint32, wParam, lParam uintptr, fuFlags, uTimeout uint32) uintptr {
 	ret, _, _ := procSendMessageTimeout.Call(
 		uintptr(hwnd),

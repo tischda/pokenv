@@ -61,7 +61,7 @@ func (p *parser) parseSection(section string) {
 
 	// if section exists, restore duplicates list
 	values := p.vars[p.currentVar]
-	if values != nil {
+	if len(values) > 0 {
 		for _, v := range values {
 			p.currentSet[v] = true
 		}
