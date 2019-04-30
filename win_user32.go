@@ -5,6 +5,7 @@ package main
 import (
 	"log"
 	"syscall"
+	"unsafe"
 )
 
 var (
@@ -24,18 +25,20 @@ const (
 	WM_SETTINGCHANGE = WM_WININICHANGE
 
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms644952(v=vs.85).aspx
+	SMTO_NORMAL      = 0x0000
 	SMTO_ABORTIFHUNG = 0x0002
 )
 
-// https://github.com/AllenDang/w32/blob/master/user32.go#L316
-func SendMessageTimeout(hwnd HWND, msg uint32, wParam, lParam uintptr, fuFlags, uTimeout uint32) uintptr {
+// Inspired from: https://github.com/AllenDang/w32/blob/master/user32.go#L318
+func SendMessageTimeout(hwnd HWND, msg uint32, wParam, lParam *uint16, fuFlags, uTimeout uint32) uintptr {
 	ret, _, _ := procSendMessageTimeout.Call(
 		uintptr(hwnd),
 		uintptr(msg),
-		wParam,
-		lParam,
+		uintptr(unsafe.Pointer(wParam)), // cast must be inlined, read comments in unsafe.go
+		uintptr(unsafe.Pointer(lParam)), // cast must be inlined, read comments in unsafe.go
 		uintptr(fuFlags),
-		uintptr(uTimeout))
+		uintptr(uTimeout),
+		0)
 
 	return ret
 }

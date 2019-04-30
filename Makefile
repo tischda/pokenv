@@ -4,12 +4,13 @@
 
 PROJECT_DIR=$(notdir $(shell pwd))
 
-BUILD_TAG=`git describe --tags 2>/dev/null`
+BUILD_TAG=$(shell git describe --tags)
 LDFLAGS=-ldflags=all="-X main.version=${BUILD_TAG} -s -w"
 
 all: get build
 
-build: go build ${LDFLAGS}
+build:
+	go build ${LDFLAGS}
 
 get:
 	go get
