@@ -1,8 +1,9 @@
 ## Changelog
 
-##### pokenv 2.0.1 - (03 May 2019)
+##### pokenv 2.1.1 - (04 June 2019)
 
     * Fixed panic in call to Windows function
+    * Work around appveyor build hangs
 
 ##### pokenv 2.0.0 - (19 July 2017)
 
