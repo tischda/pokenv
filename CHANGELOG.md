@@ -1,5 +1,9 @@
 ## Changelog
 
+##### pokenv 2.1.x - (?)
+
+    * Use go modules
+
 ##### pokenv 2.1.1 - (04 June 2019)
 
     * Fixed panic in call to Windows function
