@@ -29,7 +29,7 @@ update:
 	go mod vendor
 
 snapshot:
-	goreleaser --snapshot --skip-publish --rm-dist
+	goreleaser --snapshot --skip-publish --clean
 
 release: 
 	@echo releasing ${BUILD_TAG}
@@ -42,5 +42,6 @@ clean:
 	go clean
 	rm -f releaseinfo
 	rm -rf dist
+	rm -f coverage.out
 
 .PHONY: all test clean

@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"testing"
 )
@@ -26,23 +25,12 @@ func TestProcessTestFile(t *testing.T) {
 }
 
 func TestCheckPath(t *testing.T) {
-	var paths []string
-	if runtime.GOOS == "windows" {
-		paths = []string{
-			`c:\Windows`,
-			`c:\Windows\system32`,
-			`%windir%`,
-			`%windir%\system32`,
-			`.`,
-		}
-	} else {
-		// no variable expansion here
-		paths = []string{
-			`/etc`,
-			`/usr/bin`,
-			`/var`,
-			`.`,
-		}
+	paths := []string{
+		`c:\Windows`,
+		`c:\Windows\system32`,
+		`%windir%`,
+		`%windir%\system32`,
+		`.`,
 	}
 	for _, path := range paths {
 		if isPathInvalid(path) {
@@ -80,5 +68,26 @@ func TestParseAndCheckPaths(t *testing.T) {
 
 	if !strings.Contains(actual, expected) {
 		t.Errorf("Expected: %s, but was: %s", expected, actual)
+	}
+}
+
+func TestDeleteSectionRemovesVariable(t *testing.T) {
+	log.SetOutput(io.Discard)
+	defer log.SetOutput(os.Stdout)
+
+	// Set up the mock environment with the variable to be deleted
+	mock.env = map[string]string{
+		"deleteme": "should_be_deleted",
+	}
+
+	sut_pokenv = pokenv{registry: mock}
+	ret := sut_pokenv.processFile(REG_KEY_MACHINE, `data/deletesection.txt`)
+
+	if ret != nil {
+		t.Errorf("Expected no error, but got: %v", ret)
+	}
+
+	if _, exists := mock.env["deleteme"]; exists {
+		t.Errorf("Expected 'deleteme' variable to be deleted, but it still exists")
 	}
 }
