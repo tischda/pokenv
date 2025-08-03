@@ -56,7 +56,7 @@ func (p *parser) parseSection(section string) {
 	p.closePreviousSectionIfEmpty()
 
 	// start clean
-	p.currentVar = trimSpaces(section)
+	p.currentVar = strings.Replace(section, " ", "", -1)
 	p.currentSet = make(stringSet)
 
 	// if section exists, restore duplicates list
@@ -72,7 +72,10 @@ func (p *parser) parseValue(value string) {
 	if p.currentVar == "" {
 		log.Println("Error: orphan line (not in section):", value)
 	} else {
-		value = trimComments(value)
+		// If there is a comment in the line, return only what is left of '#'
+		if idx := strings.Index(value, "#"); idx != -1 {
+			value = strings.TrimSpace(value[:idx])
+		}
 		if p.currentSet[value] {
 			log.Println("Warning: duplicate entry:", value)
 		} else {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -34,7 +33,9 @@ func (p *pokenv) parseFile(fileName string) varMap {
 	} else {
 		var err error
 		file, err = os.Open(fileName) // O_RDONLY mode
-		checkFatal(err)
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 	defer file.Close()
 
@@ -42,17 +43,25 @@ func (p *pokenv) parseFile(fileName string) varMap {
 	return parser.parse(file)
 }
 
+// TODO: log.Fatalln() exits, this is too strong! It's probably better just to
+// log the issue and let the function return an error after processing the other
+// variables.
 func (p *pokenv) setVars(reg regKey, vars varMap) {
 	for variable, values := range vars {
 		if len(values) == 0 {
 			log.Println("Deleting", variable)
 			err := p.registry.DeleteValue(reg, variable)
-			checkFatal(err)
+			if err != nil {
+				log.Fatalln(err)
+			}
+
 		} else {
 			joined := strings.Join(values, ";")
 			log.Printf("Setting `%s` to `%s`\n", variable, joined)
 			err := p.registry.SetString(reg, variable, joined)
-			checkFatal(err)
+			if err != nil {
+				log.Fatalln(err)
+			}
 		}
 	}
 }
@@ -78,7 +87,7 @@ func assertValuesAreValidPaths(vars *varMap) bool {
 	for key, value := range *vars {
 		for _, line := range value {
 			if isPathInvalid(line) {
-				log.Print(fmt.Sprintf("Invalid path in section [%s]: %s\n", key, line))
+				log.Printf("Invalid path in section [%s]: %s\n", key, line)
 				ret = false
 			}
 		}

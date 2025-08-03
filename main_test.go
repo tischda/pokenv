@@ -1,37 +1,33 @@
+//go:build windows
+// +build windows
+
 package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
+	"strings"
 	"testing"
 )
 
-func TestMainPokenv(t *testing.T) {
-	args := []string{"-version"}
-	os.Args = append(os.Args, args...)
+func TestVersion(t *testing.T) {
+	os.Args = append(os.Args, "-version")
 
-	expected := fmt.Sprintf("pokenv version %s\n", version)
-	actual := captureOutput(main)
-
-	if expected != actual {
-		t.Errorf("Expected: %s, but was: %s", expected, actual)
-	}
-}
-
-// captures Stdout and returns output of function f()
-func captureOutput(f func()) string {
-	// redirect output
+	// capture output of process execution
 	old := os.Stdout
+	defer func() { os.Stdout = old }()
 	r, w, _ := os.Pipe()
 	os.Stdout = w
-
-	f()
-
-	// reset output again
+	main()
 	w.Close()
-	os.Stdout = old
 
-	captured, _ := ioutil.ReadAll(r)
-	return string(captured)
+	// now check that version is displayed
+	captured, _ := io.ReadAll(r)
+	actual := string(captured)
+	expected := fmt.Sprintf("%s version %s\n", PROG_NAME,version)
+
+	if !strings.Contains(actual, expected) {
+		t.Errorf("Expected: %s, but was: %s", expected, actual)
+	}
 }

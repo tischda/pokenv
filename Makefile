@@ -32,8 +32,10 @@ snapshot:
 	goreleaser --snapshot --skip-publish --rm-dist
 
 release: 
+	@echo releasing ${BUILD_TAG}
 	@sed '1,/\#\# \[${BUILD_TAG}/d;/^\#\# /Q' CHANGELOG.md > releaseinfo
-	goreleaser release --rm-dist --release-notes=releaseinfo
+	@cat releaseinfo
+	goreleaser release --clean --release-notes=releaseinfo
 	@rm -f releaseinfo
 
 clean:

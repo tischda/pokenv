@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"reflect"
@@ -51,7 +51,7 @@ func TestOrphan(t *testing.T) {
 	value2
 	`
 	expected := varMap{"SECTION-O": {"value2"}}
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	defer log.SetOutput(os.Stdout)
 	assertDeepEquals(t, expected, parseContents(contents))
 }
@@ -116,7 +116,7 @@ func TestDuplicates(t *testing.T) {
 	w.Close()
 
 	// now check that message is displayed
-	captured, _ := ioutil.ReadAll(r)
+	captured, _ := io.ReadAll(r)
 
 	actual := string(captured)
 	expected := "duplicate entry"
@@ -141,7 +141,7 @@ func TestNoDuplicates(t *testing.T) {
 	parseContents(contents)
 	w.Close()
 
-	captured, _ := ioutil.ReadAll(r)
+	captured, _ := io.ReadAll(r)
 	actual := string(captured)
 	if strings.Contains(actual, "duplicate entry") {
 		t.Errorf("No duplicates expected.")

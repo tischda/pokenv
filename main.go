@@ -7,6 +7,13 @@ import (
 	"os"
 )
 
+const PROG_NAME string = "pokenv"
+
+// The duration of the time-out period, in milliseconds. If the message is a broadcast message,
+// each window can use the full time-out period:
+// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessagetimeouta
+const TIMEOUT_MS = 5000
+
 var version string
 
 var fileName string

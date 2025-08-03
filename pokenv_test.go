@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -13,7 +13,7 @@ import (
 var sut_pokenv pokenv
 
 func TestProcessTestFile(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 	defer log.SetOutput(os.Stdout)
 
 	sut_pokenv = pokenv{registry: mock}
@@ -74,7 +74,7 @@ func TestParseAndCheckPaths(t *testing.T) {
 	}
 
 	// now check that message is displayed
-	captured, _ := ioutil.ReadAll(r)
+	captured, _ := io.ReadAll(r)
 	actual := string(captured)
 	expected := "Invalid path"
 
