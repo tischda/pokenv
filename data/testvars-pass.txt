@@ -9,6 +9,7 @@ with """ quote
 nodup
 
         [POKE_PATH ]
+        [ POKE_PATH]
 line1
 nodup
 

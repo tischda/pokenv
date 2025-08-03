@@ -1,0 +1,8 @@
+[-deleteme]
+somevalue
+
+[do-not-touch-me]
+# empty
+
+[-deleteme-not-there]
+# intentionnally missing, should not bother

@@ -17,18 +17,19 @@ type pokenv struct {
 	checkPath bool
 }
 
-func (p *pokenv) processFile(reg regKey, fileName string) {
+func (p *pokenv) processFile(reg regKey, fileName string) error {
 	vars := p.parseFile(fileName)
 
 	if !p.checkPath || assertValuesAreValidPaths(&vars) {
-		p.setVars(reg, vars)
+		return p.setVars(reg, vars)
 	}
+	return nil
 }
 
 func (p *pokenv) parseFile(fileName string) varMap {
 	var file *os.File
 
-	if fileName == "REQUIRED" {
+	if fileName == "stdin" {
 		file = os.Stdin
 	} else {
 		var err error
@@ -43,27 +44,29 @@ func (p *pokenv) parseFile(fileName string) varMap {
 	return parser.parse(file)
 }
 
-// TODO: log.Fatalln() exits, this is too strong! It's probably better just to
-// log the issue and let the function return an error after processing the other
-// variables.
-func (p *pokenv) setVars(reg regKey, vars varMap) {
+func (p *pokenv) setVars(reg regKey, vars varMap) error {
 	for variable, values := range vars {
-		if len(values) == 0 {
-			log.Println("Deleting", variable)
-			err := p.registry.DeleteValue(reg, variable)
+		var err error
+		if strings.HasPrefix(variable, "-") {
+			log.Println("Deleting", variable[1:])
+			err = p.registry.DeleteValue(reg, variable[1:])
+			// if the variable does not exist, we ignore the error
 			if err != nil {
-				log.Fatalln(err)
+				log.Printf("Warning: %s\n", err)
+				err = nil // continue processing
 			}
-
+		} else if len(values) == 0 {
+			log.Printf("Warning: [%s] is empty, will be left untouched\n", variable)
 		} else {
-			joined := strings.Join(values, ";")
-			log.Printf("Setting `%s` to `%s`\n", variable, joined)
-			err := p.registry.SetString(reg, variable, joined)
-			if err != nil {
-				log.Fatalln(err)
-			}
+			value := strings.Join(values, ";")
+			log.Printf("Setting `%s` to `%s`\n", variable, value)
+			err = p.registry.SetString(reg, variable, value)
+		}
+		if err != nil {
+			return (err) // leave loop on first error
 		}
 	}
+	return nil
 }
 
 // checks if path is valid.

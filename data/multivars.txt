@@ -2,7 +2,7 @@
 valueline1
 
 [POKE_SECTION]
-# nothing here means delete this variable
+# nothing here
 
 [POKE_TWICE]
 value1
