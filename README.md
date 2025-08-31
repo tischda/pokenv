@@ -1,14 +1,17 @@
-﻿# pokenv [![Build status](https://ci.appveyor.com/api/projects/status/hrtwo6hrx10d7i88?svg=true)](https://ci.appveyor.com/project/tischda/pokenv)
+﻿[![Build Status](https://github.com/tischda/pokenv/actions/workflows/build.yml/badge.svg)](https://github.com/tischda/pokenv/actions/workflows/build.yml)
+[![Test Status](https://github.com/tischda/pokenv/actions/workflows/test.yml/badge.svg)](https://github.com/tischda/pokenv/actions/workflows/test.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tischda/pokenv)](https://goreportcard.com/report/github.com/tischda/pokenv)
 
-Windows utility written in [Go](https://www.golang.org) to poke
-environment variables into the registry.
+# pokenv
+
+Puts environment variables into the Windows registry.
 
 ### Install
 
 There are no dependencies.
 
 ~~~
-go get github.com/tischda/pokenv
+go install github.com/tischda/pokenv@latest
 ~~~
 
 ### Usage

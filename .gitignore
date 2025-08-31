@@ -1,4 +1,4 @@
+*.exe
 coverage.out
-pokenv.exe
-releaseinfo
 dist/
+releaseinfo
