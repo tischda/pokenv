@@ -1,9 +1,8 @@
-// +build windows
+//go:build windows
 
 package main
 
 import (
-	"log"
 	"syscall"
 	"unsafe"
 )
@@ -41,14 +40,4 @@ func SendMessageTimeout(hwnd HWND, msg uint32, wParam, lParam *uint16, fuFlags, 
 		0)
 
 	return ret
-}
-
-// https://golang.org/src/syscall/syscall_windows.go
-// syscall.StringToUTF16Ptr is deprecated, here is our own:
-func StringToUTF16Ptr(s string) *uint16 {
-	ptr, err := syscall.UTF16PtrFromString(s)
-	if err != nil {
-		log.Fatalln("String with NULL passed to StringToUTF16Ptr")
-	}
-	return ptr
 }

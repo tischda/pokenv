@@ -86,14 +86,9 @@ OPTIONS:`)
 	}
 
 	// refresh Environment
-
-	// note that when an application sends this message, wParam must be NULL:
-	// https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-settingchange
-	ret := SendMessageTimeout(HWND_BROADCAST, WM_SETTINGCHANGE, nil,
-		StringToUTF16Ptr("Environment"), SMTO_NORMAL|SMTO_ABORTIFHUNG, TIMEOUT_MS)
-
-	if ret == 0 { // if the function succeeds, the return value is non-zero
-		log.Println("Refresh: Error")
+	err = refresh()
+	if err != nil {
+		log.Println("Refresh error:", err)
 		os.Exit(1)
 	}
 }

@@ -1,4 +1,4 @@
-// +build windows
+//go:build windows
 
 package main
 
@@ -44,44 +44,6 @@ func (realRegistry) SetString(path regKey, valueName string, value string) error
 		uint32(len(value)*2))
 }
 
-// Read string from Windows registry (no expansion).
-// Thanks to http://npf.io/2012/11/go-win-stuff/
-func (realRegistry) GetString(path regKey, valueName string) (value string, err error) {
-	handle := openKey(path, syscall.KEY_QUERY_VALUE)
-	defer syscall.RegCloseKey(handle)
-
-	var typ uint32
-	var bufSize uint32
-
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms724911(v=vs.85).aspx
-	err = syscall.RegQueryValueEx(
-		handle,
-		StringToUTF16Ptr(valueName),
-		nil,
-		&typ,
-		nil,
-		&bufSize)
-
-	if err != nil {
-		return
-	}
-
-	data := make([]uint16, bufSize/2+1)
-
-	err = syscall.RegQueryValueEx(
-		handle,
-		StringToUTF16Ptr(valueName),
-		nil,
-		&typ,
-		(*byte)(unsafe.Pointer(&data[0])),
-		&bufSize)
-
-	if err != nil {
-		return
-	}
-	return syscall.UTF16ToString(data), nil
-}
-
 // Deletes a key value from the Windows registry.
 func (realRegistry) DeleteValue(path regKey, valueName string) error {
 	handle := openKey(path, syscall.KEY_SET_VALUE)
@@ -90,21 +52,50 @@ func (realRegistry) DeleteValue(path regKey, valueName string) error {
 	return regDeleteValue(handle, StringToUTF16Ptr(valueName))
 }
 
-// Opens a Windows registry key and returns a handle. You must close
-// the handle with `defer syscall.RegCloseKey(handle)` in the calling code.
+// Opens a Windows registry key and returns a handle. You must close the
+// handle with `defer syscall.RegCloseKey(handle)` in the calling code.
 func openKey(path regKey, desiredAccess uint32) syscall.Handle {
 	var handle syscall.Handle
 
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms724897(v=vs.85).aspx
-	err := syscall.RegOpenKeyEx(
+	subkey, err := syscall.UTF16PtrFromString(path.lpSubKey)
+	if err != nil {
+		log.Fatalln("Error on registry path.subKey:", path.lpSubKey, err)
+	}
+
+	err = syscall.RegOpenKeyEx(
 		hKeyTable[path.hKeyIdx],
-		StringToUTF16Ptr(path.lpSubKey),
+		subkey,
 		0,
 		desiredAccess,
 		&handle)
 
 	if err != nil {
-		log.Fatalln("Cannot open registry path:", path)
+		log.Fatalln("Cannot open registry path:", path, err)
 	}
 	return handle
+}
+
+// refresh Environment
+func refresh() error {
+	lParam, _ := syscall.UTF16PtrFromString("Environment")
+
+	// note that when an application sends this message, wParam must be NULL:
+	// https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-settingchange
+	ret := SendMessageTimeout(HWND_BROADCAST, WM_SETTINGCHANGE, nil,
+		lParam, SMTO_NORMAL|SMTO_ABORTIFHUNG, TIMEOUT_MS)
+
+	if ret == 0 { // if the function succeeds, the return value is non-zero
+		return syscall.GetLastError()
+	}
+	return nil
+}
+
+// https://golang.org/src/syscall/syscall_windows.go
+// syscall.StringToUTF16Ptr is deprecated, here is our own:
+func StringToUTF16Ptr(s string) *uint16 {
+	ptr, err := syscall.UTF16PtrFromString(s)
+	if err != nil {
+		log.Fatalln("String with NULL passed to StringToUTF16Ptr")
+	}
+	return ptr
 }
