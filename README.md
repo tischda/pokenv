@@ -1,5 +1,6 @@
 ﻿[![Build Status](https://github.com/tischda/pokenv/actions/workflows/build.yml/badge.svg)](https://github.com/tischda/pokenv/actions/workflows/build.yml)
 [![Test Status](https://github.com/tischda/pokenv/actions/workflows/test.yml/badge.svg)](https://github.com/tischda/pokenv/actions/workflows/test.yml)
+[![Coverage Status](https://coveralls.io/repos/tischda/pokenv/badge.svg)](https://coveralls.io/r/tischda/pokenv)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tischda/pokenv)](https://goreportcard.com/report/github.com/tischda/pokenv)
 
 # pokenv
@@ -11,7 +12,7 @@ Puts environment variables into the Windows registry.
 There are no dependencies.
 
 ~~~
-go install github.com/tischda/pokenv@latest
+go install github.com/tischda/pokenv/v3@latest
 ~~~
 
 ### Usage
