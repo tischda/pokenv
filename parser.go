@@ -56,7 +56,7 @@ func (p *parser) parseSection(section string) {
 	p.closePreviousSectionIfEmpty()
 
 	// start clean
-	p.currentVar = strings.Replace(section, " ", "", -1)
+	p.currentVar = strings.ReplaceAll(section, " ", "")
 	p.currentSet = make(stringSet)
 
 	// if section exists, restore duplicates list

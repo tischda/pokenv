@@ -26,7 +26,12 @@ var hKeyTable = []syscall.Handle{
 // the value contains "%", otherwise it will use REG_SZ.
 func (realRegistry) SetString(path regKey, valueName string, value string) error {
 	handle := openKey(path, syscall.KEY_SET_VALUE)
-	defer syscall.RegCloseKey(handle)
+	defer func() {
+		err := syscall.RegCloseKey(handle)
+		if err != nil {
+			log.Printf("pokenv: failed to close registry key: %v", err)
+		}
+	}()
 
 	// set type
 	var valueType uint32 = syscall.REG_SZ
@@ -47,7 +52,12 @@ func (realRegistry) SetString(path regKey, valueName string, value string) error
 // Deletes a key value from the Windows registry.
 func (realRegistry) DeleteValue(path regKey, valueName string) error {
 	handle := openKey(path, syscall.KEY_SET_VALUE)
-	defer syscall.RegCloseKey(handle)
+	defer func() {
+		err := syscall.RegCloseKey(handle)
+		if err != nil {
+			log.Printf("pokenv: failed to close registry key: %v", err)
+		}
+	}()
 
 	return regDeleteValue(handle, StringToUTF16Ptr(valueName))
 }
