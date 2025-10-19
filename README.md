@@ -1,13 +1,16 @@
 ﻿[![Build Status](https://github.com/tischda/pokenv/actions/workflows/build.yml/badge.svg)](https://github.com/tischda/pokenv/actions/workflows/build.yml)
 [![Test Status](https://github.com/tischda/pokenv/actions/workflows/test.yml/badge.svg)](https://github.com/tischda/pokenv/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/tischda/pokenv/badge.svg)](https://coveralls.io/r/tischda/pokenv)
-[![Go Report Card](https://goreportcard.com/badge/github.com/tischda/pokenv)](https://goreportcard.com/report/github.com/tischda/pokenv)
+[![Linter Status](https://github.com/tischda/pokenv/actions/workflows/linter.yml/badge.svg)](https://github.com/tischda/pokenv/actions/workflows/linter.yml)
+[![License](https://img.shields.io/github/license/tischda/pokenv)](/LICENSE)
+[![Release](https://img.shields.io/github/release/tischda/pokenv.svg)](https://github.com/tischda/pokenv/releases/latest)
+
 
 # pokenv
 
 Puts environment variables into the Windows registry.
 
-### Install
+## Install
 
 There are no dependencies.
 
@@ -15,7 +18,7 @@ There are no dependencies.
 go install github.com/tischda/pokenv/v3@latest
 ~~~
 
-### Usage
+## Usage
 
 ~~~
 Usage: pokenv [--checkpaths] [--machine] [-f inifile]
@@ -54,7 +57,7 @@ EXAMPLES:
   make sure ALL values are actually paths. If you set GOFLAGS here, it will fail.
 ~~~
 
-### Input format
+## Input format
 
 The input file has the following format:
 
@@ -92,7 +95,7 @@ Deleting MYVAR
 ~~~
 
 
-### Other setters
+## Other setters
 
 * http://sourceforge.net/projects/pathmanager/files/?source=navbar
 * http://www.rapidee.com/en/about
