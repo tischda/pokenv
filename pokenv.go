@@ -38,7 +38,7 @@ func (p *pokenv) parseFile(fileName string) varMap {
 			log.Fatalln(err)
 		}
 	}
-	defer file.Close()
+	defer file.Close()  //nolint:errcheck
 
 	var parser = &parser{}
 	return parser.parse(file)
