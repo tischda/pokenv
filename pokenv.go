@@ -13,17 +13,30 @@ var REG_KEY_USER = regKey{HKEY_CURRENT_USER, `Environment`}
 var REG_KEY_MACHINE = regKey{HKEY_LOCAL_MACHINE, `SYSTEM\CurrentControlSet\Control\Session Manager\Environment`}
 
 type pokenv struct {
-	registry  Registry
-	checkPath bool
+	registry Registry
+	config   *Config
 }
 
 func (p *pokenv) processFile(reg regKey, fileName string) error {
 	vars := p.parseFile(fileName)
 
-	if !p.checkPath || assertValuesAreValidPaths(&vars) {
-		return p.setVars(reg, vars)
-	}
-	return nil
+	// TODO: This must be done for all variables defined in:
+	//
+	// [POKENV_CHECK_PATHS]
+	// PATH
+	// ANT_HOME
+	// GRADLE_HOME
+	// M2_HOME
+	// ...
+	//
+	// TODO: if not present (current user), insert a default set of variables to check
+	// TODO: expand environment variables like %windir% before checking
+	// TODO:	a) from variables being set in this run
+	// TODO:    b) from variables already set in the registry (current user + machine)
+	//
+	// assertValuesAreValidPaths(&vars)
+
+	return p.setVars(reg, vars)
 }
 
 func (p *pokenv) parseFile(fileName string) varMap {
@@ -38,7 +51,7 @@ func (p *pokenv) parseFile(fileName string) varMap {
 			log.Fatalln(err)
 		}
 	}
-	defer file.Close()  //nolint:errcheck
+	defer file.Close() //nolint:errcheck
 
 	var parser = &parser{}
 	return parser.parse(file)
@@ -82,6 +95,8 @@ func isPathInvalid(path string) bool {
 }
 
 // checks all values in the vars map assuming they are valid paths (all values are checked)
+// TODO: we need to expand environment variables like %windir% before checking
+//
 // returns:
 // * false if at least one path is invalid
 // * true if all values are valid paths

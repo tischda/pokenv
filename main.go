@@ -7,37 +7,51 @@ import (
 	"os"
 )
 
-const PROG_NAME string = "pokenv"
+// https://goreleaser.com/cookbooks/using-main.version/
+var (
+	name    string
+	version string
+	date    string
+	commit  string
+)
 
-// The duration of the time-out period, in milliseconds. If the message is a broadcast message,
-// each window can use the full time-out period:
-// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessagetimeouta
-const TIMEOUT_MS = 5000
+// flags
+type Config struct {
+	user    bool
+	machine bool
+	file    string
+	noop    bool
+	quiet   bool
+	help    bool
+	version bool
+}
 
-var version string
-
-var fileName string
-var flagHelp = flag.Bool("help", false, "displays this help message")
-var flagMachine = flag.Bool("machine", false, "specifies that the variables should be set system wide (HKEY_LOCAL_MACHINE)")
-var flagCheck = flag.Bool("checkpaths", false, "check if ALL values are valid paths on this system")
-var flagVersion = flag.Bool("version", false, "print version and exit")
-
-func init() {
-	flag.BoolVar(flagHelp, "h", false, "")
-	flag.BoolVar(flagMachine, "m", false, "")
-	flag.BoolVar(flagCheck, "c", false, "")
-	flag.BoolVar(flagVersion, "v", false, "")
-	flag.StringVar(&fileName, "f", "stdin", "file containing the variables to load into the Windows environment")
+func initFlags() *Config {
+	cfg := &Config{}
+	flag.BoolVar(&cfg.user, "u", false, "")
+	flag.BoolVar(&cfg.user, "user", false, "variables should be set for current user (HKEY_CURRENT_USER) (default)")
+	flag.BoolVar(&cfg.machine, "m", false, "")
+	flag.BoolVar(&cfg.machine, "machine", false, "variables should be set system wide (HKEY_LOCAL_MACHINE)")
+	flag.StringVar(&cfg.file, "f", "stdin", "")
+	flag.StringVar(&cfg.file, "file", "stdin", "text file containing the variables to load (default \"stdin\")")
+	flag.BoolVar(&cfg.quiet, "q", false, "")
+	flag.BoolVar(&cfg.quiet, "quiet", false, "suppress non-error output")
+	flag.BoolVar(&cfg.help, "?", false, "")
+	flag.BoolVar(&cfg.help, "help", false, "displays this help message")
+	flag.BoolVar(&cfg.version, "v", false, "")
+	flag.BoolVar(&cfg.version, "version", false, "print version and exit")
+	return cfg
 }
 
 func main() {
 	log.SetFlags(0)
+	cfg := initFlags()
 
 	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: "+PROG_NAME+` [--checkpaths] [--machine] [-f inifile] 
+		fmt.Fprintln(os.Stderr, "Usage: "+name+` [OPTIONS] [-f file]
 
-where inifile is a file containing the variables to load into the Windows environment.
-For example, you can use a file like this:
+Pokenv uses a text file containing the variables to load (default "stdin").
+The input format should look like this:
 
   [GOBIN]
   c:\usr\bin
@@ -45,23 +59,35 @@ For example, you can use a file like this:
   [-GOPATH]
   # prefix with dash '-' to remove variable
 
+OPTIONS:
+  -u, --user
+        set vars for current user (HKEY_CURRENT_USER) (default)
+  -m, --machine
+        set vars system wide (HKEY_LOCAL_MACHINE)
+  -f, --file
+        text file containing the variables to load (default "stdin")
+  -n, --noop
+        do not modify registry
+  -q, --quiet
+        suppress non-error output
+  -?, --help
+        display this help message
+  -v, --version
+        print version and exit
 
-OPTIONS:`)
-		flag.PrintDefaults()
-		fmt.Fprintln(os.Stderr, "\n\nEXAMPLES:")
-		fmt.Fprintln(os.Stderr, "  "+PROG_NAME+` --checkpaths -f paths.ini
+EXAMPLES:`)
 
-  where paths.ini could be the example shown above. When using the --checkpaths option,
-  make sure ALL values are actually paths. If you set GOFLAGS here, it will fail.`)
+		fmt.Fprintln(os.Stderr, "\n  $ "+name+` -f user_variables.ini`)
 	}
+
 	flag.Parse()
 
-	if flag.Arg(0) == "version" || *flagVersion {
-		fmt.Printf("%s version %s\n", PROG_NAME, version)
+	if flag.Arg(0) == "version" || cfg.version {
+		fmt.Printf("%s %s, built on %s (commit: %s)\n", name, version, date, commit)
 		return
 	}
 
-	if *flagHelp {
+	if cfg.help {
 		flag.Usage()
 		return
 	}
@@ -71,14 +97,31 @@ OPTIONS:`)
 		os.Exit(1)
 	}
 
+	// TODO: implement noop
+	if cfg.noop {
+		log.Fatalln("--noop not implemented")
+	}
+	// TODO: implement quiet
+	if cfg.quiet {
+		log.Fatalln("--quiet not implemented")
+	}
+
+	if !cfg.user && !cfg.machine {
+		cfg.user = true // default
+	}
+
+	if cfg.user && cfg.machine {
+		log.Fatalln("Cannot specify both --user and --machine")
+	}
+
 	// process registry
 	registry := realRegistry{}
-	pokenv := pokenv{registry: registry, checkPath: *flagCheck}
+	pokenv := pokenv{registry, cfg}
 	var err error
-	if *flagMachine {
-		err = pokenv.processFile(REG_KEY_MACHINE, fileName)
+	if cfg.machine {
+		err = pokenv.processFile(REG_KEY_MACHINE, cfg.file)
 	} else {
-		err = pokenv.processFile(REG_KEY_USER, fileName)
+		err = pokenv.processFile(REG_KEY_USER, cfg.file)
 	}
 	if err != nil {
 		log.Println("Error:", err)

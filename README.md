@@ -8,7 +8,7 @@
 
 # pokenv
 
-Puts environment variables into the Windows registry.
+Loads environment variables into the Windows registry.
 
 ## Install
 
@@ -21,10 +21,10 @@ go install github.com/tischda/pokenv/v3@latest
 ## Usage
 
 ~~~
-Usage: pokenv [--checkpaths] [--machine] [-f inifile]
+Usage: pokenv [OPTIONS] [-f file]
 
-where inifile is a file containing the variables to load into the Windows environment.
-For example, you can use a file like this:
+Pokenv uses a text file containing the variables to load (default "stdin").
+The input format should look like this:
 
   [GOBIN]
   c:\usr\bin
@@ -32,30 +32,28 @@ For example, you can use a file like this:
   [-GOPATH]
   # prefix with dash '-' to remove variable
 
-
 OPTIONS:
-  -c
-  -checkpaths
-        check if ALL values are valid paths on this system
-  -f string
-        file containing the variables to load into the Windows environment (default "stdin")
-  -h
-  -help
-        displays this help message
-  -m
-  -machine
-        specifies that the variables should be set system wide (HKEY_LOCAL_MACHINE)
-  -v
-  -version
+  -u, --user
+        set vars for current user (HKEY_CURRENT_USER) (default)
+  -m, --machine
+        set vars system wide (HKEY_LOCAL_MACHINE)
+  -f, --file
+        text file containing the variables to load (default "stdin")
+  -n, --noop
+        do not modify registry
+  -q, --quiet
+        suppress non-error output
+  -?, --help
+        display this help message
+  -v, --version
         print version and exit
-
-
-EXAMPLES:
-  pokenv --checkpaths -f paths.ini
-
-  where paths.ini could be the example shown above. When using the --checkpaths option,
-  make sure ALL values are actually paths. If you set GOFLAGS here, it will fail.
 ~~~
+
+## EXAMPLES
+~~~
+pokenv -f user_variables.ini
+~~~
+
 
 ## Input format
 

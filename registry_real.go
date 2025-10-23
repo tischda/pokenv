@@ -22,6 +22,11 @@ var hKeyTable = []syscall.Handle{
 	syscall.HKEY_DYN_DATA,
 }
 
+// The duration of the time-out period, in milliseconds. If the message is a broadcast message,
+// each window can use the full time-out period:
+// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessagetimeouta
+const TIMEOUT_MS = 5000
+
 // Writes a string to the Windows registry. Type is set to REG_EXPAND_SZ when
 // the value contains "%", otherwise it will use REG_SZ.
 func (realRegistry) SetString(path regKey, valueName string, value string) error {
@@ -29,7 +34,7 @@ func (realRegistry) SetString(path regKey, valueName string, value string) error
 	defer func() {
 		err := syscall.RegCloseKey(handle)
 		if err != nil {
-			log.Printf("pokenv: failed to close registry key: %v", err)
+			log.Printf("failed to close registry key: %v", err)
 		}
 	}()
 
@@ -55,7 +60,7 @@ func (realRegistry) DeleteValue(path regKey, valueName string) error {
 	defer func() {
 		err := syscall.RegCloseKey(handle)
 		if err != nil {
-			log.Printf("pokenv: failed to close registry key: %v", err)
+			log.Printf("failed to close registry key: %v", err)
 		}
 	}()
 
@@ -69,7 +74,7 @@ func openKey(path regKey, desiredAccess uint32) syscall.Handle {
 
 	subkey, err := syscall.UTF16PtrFromString(path.lpSubKey)
 	if err != nil {
-		log.Fatalln("Error on registry path.subKey:", path.lpSubKey, err)
+		log.Fatalln("error on registry path.subKey:", path.lpSubKey, err)
 	}
 
 	err = syscall.RegOpenKeyEx(
@@ -80,7 +85,7 @@ func openKey(path regKey, desiredAccess uint32) syscall.Handle {
 		&handle)
 
 	if err != nil {
-		log.Fatalln("Cannot open registry path:", path, err)
+		log.Fatalln("cannot open registry path:", path, err)
 	}
 	return handle
 }
