@@ -15,7 +15,7 @@ Loads environment variables into the Windows registry.
 There are no dependencies.
 
 ~~~
-go install github.com/tischda/pokenv/v3@latest
+go install github.com/tischda/pokenv/v2@latest
 ~~~
 
 ## Usage
