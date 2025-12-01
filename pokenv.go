@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -20,22 +19,41 @@ type pokenv struct {
 func (p *pokenv) processFile(reg regKey, fileName string) error {
 	vars := p.parseFile(fileName)
 
-	// TODO: This must be done for all variables defined in:
-	//
-	// [POKENV_CHECK_PATHS]
-	// PATH
-	// ANT_HOME
-	// GRADLE_HOME
-	// M2_HOME
-	// ...
-	//
-	// TODO: if not present (current user), insert a default set of variables to check
-	// TODO: expand environment variables like %windir% before checking
-	// TODO:	a) from variables being set in this run
-	// TODO:    b) from variables already set in the registry (current user + machine)
-	//
-	// assertValuesAreValidPaths(&vars)
+	// TODO: re-implement path checking:
+	/*
+		1. Define a variable that lists variables that should be checked as paths:
 
+		POKENV_CHECK_PATHS
+
+		If this variable is not present (HKEY_CURRENT_USER), insert a default set of variables to check, eg.:
+
+		[POKENV_CHECK_PATHS]
+		PATH
+		ANT_HOME
+		GRADLE_HOME
+		M2_HOME
+		...
+
+		2. For each item in the previous list, check validity of paths in:
+
+		   a) variables being set in this run
+		   b) variables already set in the registry (current user + machine)
+
+		3. Since POKENV_CHECK_PATHS can be set in the current run, and there are dependencies between variables,
+		   we need to check variables only after setting them all. This means that we need to do two passes:
+
+		   a) first pass: set variables (with path checking disabled)
+		   b) second pass: read POKENV_CHECK_PATHS variables from registry,
+		   		list PATH variables, read contents (HKEY_CURRENT_USER + MACHINE) and check paths.
+
+		   		(note: reading variables from the registry in implemented in peekenv)
+
+		4. If any invalid path is found, log warnings but do NOT abort processing
+
+		   Function that did the checking before:
+				assertValuesAreValidPaths(&vars)
+
+	*/
 	return p.setVars(reg, vars)
 }
 
@@ -82,6 +100,9 @@ func (p *pokenv) setVars(reg regKey, vars varMap) error {
 	return nil
 }
 
+// TODO: re-enable when path checking is implemented
+/*
+
 // checks if path is valid.
 // Does Windows variable expansion so that '%windir%' resolves to 'c:\Windows'.
 func isPathInvalid(path string) bool {
@@ -112,3 +133,4 @@ func assertValuesAreValidPaths(vars *varMap) bool {
 	}
 	return ret
 }
+*/
