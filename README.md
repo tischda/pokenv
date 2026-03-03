@@ -2,7 +2,7 @@
 [![Test Status](https://github.com/tischda/pokenv/actions/workflows/test.yml/badge.svg)](https://github.com/tischda/pokenv/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/tischda/pokenv/badge.svg)](https://coveralls.io/r/tischda/pokenv)
 [![Linter Status](https://github.com/tischda/pokenv/actions/workflows/linter.yml/badge.svg)](https://github.com/tischda/pokenv/actions/workflows/linter.yml)
-[![License](https://img.shields.io/github/license/tischda/pokenv)](/LICENSE)
+[![License](https://img.shields.io/github/license/tischda/pokenv.svg)](/LICENSE)
 [![Release](https://img.shields.io/github/release/tischda/pokenv.svg)](https://github.com/tischda/pokenv/releases/latest)
 
 
